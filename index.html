@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Savelo – Finanzas Personales</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#2CC5A0; --teal-dark:#1fa882; --teal-glow:rgba(44,197,160,0.18);
+    --radius:18px; --shadow:0 4px 24px rgba(0,0,0,0.07); --shadow-lg:0 12px 48px rgba(0,0,0,0.12);
+    --red:#ff5a5f; --yellow:#f5a623; --purple:#6C63FF;
+  }
+  [data-theme="light"] {
+    --bg:#f0f4f2; --card:#ffffff; --text:#0f1c1a; --muted:#7a9490;
+    --border:#dde8e5; --input-bg:#f5f7fa; --red-light:#fff0f0;
+    --green-light:#e6f9f5; --yellow-light:#fff8ed; --purple-light:#f0eeff;
+    --overlay:rgba(15,28,26,0.55); --nav-shadow:0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="dark"] {
+    --bg:#0d1917; --card:#162320; --text:#e8f5f2; --muted:#5a8078;
+    --border:#243530; --input-bg:#0d1917; --red-light:#2a1516;
+    --green-light:#0e2820; --yellow-light:#241a08; --purple-light:#1a1830;
+    --overlay:rgba(0,0,0,0.75); --nav-shadow:0 2px 12px rgba(0,0,0,0.3);
+  }
+  [data-theme="dark"] .logo-wordmark { fill:#2DD4A0; }
+  [data-theme="light"] .logo-wordmark { fill:#0A7A52; }
+
+  *,*::before,*::after { box-sizing:border-box; }
+  body { font-family:'Sora',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; transition:background .25s,color .25s; }
+  .page { display:none; min-height:100vh; }
+  .page.active { display:flex; flex-direction:column; }
+
+  /* ── ONBOARDING ── */
+  #page-onboarding {
+    background:linear-gradient(145deg,#0d2820 0%,#0f1c1a 60%,#0d2820 100%);
+    align-items:center; justify-content:center; padding:30px 24px;
+  }
+  .ob-wrap { width:100%; max-width:400px; animation:fadeUp .5s ease both; }
+  .ob-logo { display:flex; align-items:center; justify-content:center; margin-bottom:36px; }
+  .ob-step { display:none; }
+  .ob-step.active { display:block; }
+  .ob-headline { font-size:1.7rem; font-weight:800; color:#e8f5f2; line-height:1.2; margin-bottom:8px; letter-spacing:-.03em; }
+  .ob-sub { font-size:.88rem; color:#5a8078; margin-bottom:28px; line-height:1.5; }
+  .ob-input { width:100%; padding:15px 16px; border:1.5px solid #243530; border-radius:13px; font-family:inherit; font-size:1rem; background:#162320; color:#e8f5f2; outline:none; margin-bottom:14px; transition:border .2s; }
+  .ob-input:focus { border-color:var(--teal); }
+  .ob-input::placeholder { color:#3a5550; }
+  .ob-btn { width:100%; background:var(--teal); color:#fff; border:none; border-radius:13px; padding:15px; font-family:inherit; font-size:.95rem; font-weight:700; cursor:pointer; transition:background .2s,transform .15s; margin-top:6px; }
+  .ob-btn:hover { background:var(--teal-dark); transform:translateY(-1px); }
+  .ob-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  .ob-progress { display:flex; gap:6px; justify-content:center; margin-bottom:32px; }
+  .ob-dot { width:28px; height:4px; border-radius:4px; background:#243530; transition:background .3s; }
+  .ob-dot.active { background:var(--teal); }
+  .currency-grid-ob { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+  .currency-btn-ob { padding:11px 6px; border-radius:11px; border:1.5px solid #243530; background:#162320; font-family:inherit; font-size:.75rem; font-weight:600; color:#5a8078; cursor:pointer; text-align:center; transition:all .18s; line-height:1.4; }
+  .currency-btn-ob span { display:block; font-size:1rem; margin-bottom:2px; }
+  .currency-btn-ob.active { border-color:var(--teal); background:#0e2820; color:var(--teal); }
+  .avatar-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:18px; }
+  .avatar-opt { width:52px; height:52px; border-radius:50%; border:2.5px solid #243530; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all .18s; margin:0 auto; }
+  .avatar-opt.selected { border-color:var(--teal); box-shadow:0 0 0 3px rgba(44,197,160,0.25); transform:scale(1.08); }
+
+  /* ── PROFILES ── */
+  #page-profiles { background:linear-gradient(145deg,#0d2820 0%,#0f1c1a 60%,#0d2820 100%); align-items:center; justify-content:center; padding:30px 24px; }
+  .profiles-wrap { width:100%; max-width:400px; margin:auto; animation:fadeUp .5s ease both; }
+  .profiles-headline { font-size:1.45rem; font-weight:800; color:#e8f5f2; text-align:center; margin-bottom:6px; letter-spacing:-.02em; }
+  .profiles-sub { font-size:.82rem; color:#5a8078; text-align:center; margin-bottom:26px; }
+  .profile-list { display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+  .profile-card { background:#162320; border:1.5px solid #243530; border-radius:14px; padding:15px 16px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all .18s; }
+  .profile-card:hover { border-color:var(--teal); transform:translateX(3px); }
+  .profile-avatar { width:44px; height:44px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0; }
+  .profile-info { flex:1; }
+  .profile-name { font-size:.92rem; font-weight:700; color:#e8f5f2; margin-bottom:2px; }
+  .profile-meta { font-size:.73rem; color:#5a8078; }
+  .btn-new-profile { width:100%; background:transparent; color:var(--teal); border:1.5px solid #243530; border-radius:13px; padding:14px; font-family:inherit; font-size:.88rem; font-weight:700; cursor:pointer; transition:all .18s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-new-profile:hover { border-color:var(--teal); background:rgba(44,197,160,0.06); }
+
+  /* ── NAV ── */
+  .nav { background:var(--card); padding:14px 22px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:var(--nav-shadow); transition:background .25s,border-color .25s; }
+  .nav-logo { display:flex; align-items:center; text-decoration:none; }
+  .nav-back { display:flex; align-items:center; gap:5px; background:none; border:none; cursor:pointer; font-family:inherit; font-size:0.88rem; color:var(--muted); font-weight:500; transition:color .2s; }
+  .nav-back:hover { color:var(--teal); }
+  .nav-title { font-weight:700; font-size:.95rem; color:var(--text); }
+  .nav-actions { display:flex; align-items:center; gap:10px; }
+  .nav-icon-btn { width:36px; height:36px; border-radius:10px; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); transition:all .2s; }
+  .nav-icon-btn:hover { color:var(--teal); border-color:var(--teal); }
+  .nav-avatar { width:34px; height:34px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; font-size:1.1rem; cursor:pointer; }
+
+  .content { padding:22px; flex:1; max-width:520px; margin:0 auto; width:100%; }
+
+  /* ── WELCOME BANNER ── */
+  .welcome-banner { background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%); border-radius:var(--radius); padding:26px 22px; color:#fff; position:relative; overflow:hidden; margin-bottom:18px; animation:fadeUp .4s ease both; }
+  .welcome-banner::before { content:''; position:absolute; top:-50px; right:-50px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.07); }
+  .welcome-banner::after  { content:''; position:absolute; bottom:-60px; right:10px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.05); }
+  .welcome-greeting { font-size:.82rem; opacity:.8; margin-bottom:3px; }
+  .welcome-name { font-size:1.45rem; font-weight:800; margin-bottom:14px; letter-spacing:-.02em; }
+  .insight-chip { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.2); border-radius:30px; padding:7px 14px; font-size:.8rem; font-weight:600; backdrop-filter:blur(4px); }
+
+  /* ── BTN ADD ── */
+  .btn-add { width:100%; background:var(--teal); color:#fff; border:none; border-radius:14px; padding:14px; font-family:inherit; font-size:.92rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s,transform .15s,box-shadow .2s; box-shadow:0 4px 16px var(--teal-glow); margin-bottom:22px; letter-spacing:-.01em; }
+  .btn-add:hover { background:var(--teal-dark); transform:translateY(-1px); box-shadow:0 8px 24px var(--teal-glow); }
+  .btn-add:active { transform:scale(.98); }
+
+  /* ── STAT CARDS ── */
+  .cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:22px; }
+  .stat-card { background:var(--card); border-radius:var(--radius); padding:17px 15px; cursor:pointer; transition:transform .18s,box-shadow .18s,border-color .18s; box-shadow:var(--shadow); border:1.5px solid var(--border); position:relative; overflow:hidden; }
+  .stat-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:var(--teal); }
+  .stat-card:active { transform:scale(.97); }
+  .stat-label { font-size:.78rem; color:var(--muted); font-weight:700; margin-bottom:6px; letter-spacing:.06em; text-transform:uppercase; }
+  .stat-value { font-size:1.35rem; font-weight:700; letter-spacing:-.01em; line-height:1.1; font-family:Arial,Helvetica,sans-serif; }
+  .stat-delta { font-size:.69rem; margin-top:5px; font-weight:600; }
+  .stat-delta.up { color:var(--teal); } .stat-delta.down { color:var(--red); }
+  .card-arrow { position:absolute; top:13px; right:13px; color:var(--border); }
+  .card-balance .stat-value { color:var(--purple); }
+  .card-income  .stat-value { color:var(--teal); }
+  .card-expense .stat-value { color:var(--red); }
+  .card-saving  .stat-value { color:var(--yellow); }
+
+  /* ── FORECAST CARD ── */
+  .forecast-card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:22px; box-shadow:var(--shadow); border:1.5px solid var(--border); }
+  .forecast-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .forecast-title { font-size:.88rem; font-weight:700; display:flex; align-items:center; gap:7px; }
+  .forecast-badge { font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .forecast-badge.ok   { background:var(--green-light); color:var(--teal); }
+  .forecast-badge.warn { background:var(--yellow-light); color:#c47d00; }
+  .forecast-badge.bad  { background:var(--red-light); color:var(--red); }
+  .forecast-bar-wrap { height:8px; background:var(--border); border-radius:8px; overflow:hidden; margin-bottom:10px; }
+  .forecast-bar { height:100%; border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+  .forecast-bar.ok   { background:linear-gradient(90deg,var(--teal),var(--teal-dark)); }
+  .forecast-bar.warn { background:linear-gradient(90deg,#f5a623,#d9890a); }
+  .forecast-bar.bad  { background:linear-gradient(90deg,#ff5a5f,#e03040); }
+  .forecast-legend { display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); }
+  .forecast-msg { font-size:.8rem; color:var(--text); margin-top:10px; line-height:1.5; padding-top:10px; border-top:1px solid var(--border); }
+
+  /* ── AI INSIGHTS ── */
+  .insights-section { margin-bottom:22px; }
+  .insight-card { background:var(--card); border-radius:14px; padding:15px 16px; margin-bottom:9px; box-shadow:var(--shadow); border:1px solid var(--border); display:flex; align-items:flex-start; gap:12px; animation:fadeUp .35s ease both; transition:border-color .18s; }
+  .insight-card:hover { border-color:var(--teal); }
+  .insight-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.95rem; }
+  .insight-icon.green  { background:var(--green-light); }
+  .insight-icon.yellow { background:var(--yellow-light); }
+  .insight-icon.red    { background:var(--red-light); }
+  .insight-icon.purple { background:var(--purple-light); }
+  .insight-body { flex:1; }
+  .insight-tag  { font-size:.65rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+  .insight-text { font-size:.82rem; line-height:1.5; color:var(--text); }
+  .insight-text strong { color:var(--teal); }
+
+  /* ── CHALLENGES ── */
+  .challenge-card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:22px; box-shadow:var(--shadow); border:1.5px solid var(--border); }
+  .challenge-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+  .challenge-title { font-size:.88rem; font-weight:700; display:flex; align-items:center; gap:7px; }
+  .challenge-days  { font-size:.7rem; color:var(--muted); font-weight:600; }
+  .challenge-desc { font-size:.8rem; color:var(--muted); margin-bottom:12px; line-height:1.4; }
+  .challenge-progress-wrap { height:8px; background:var(--border); border-radius:8px; overflow:hidden; margin-bottom:7px; }
+  .challenge-progress-bar { height:100%; border-radius:8px; background:linear-gradient(90deg,var(--purple),#9b93ff); transition:width .6s cubic-bezier(.22,1,.36,1); }
+  .challenge-footer { display:flex; justify-content:space-between; font-size:.72rem; }
+  .challenge-pct  { font-weight:700; color:var(--purple); }
+  .challenge-status { color:var(--muted); }
+  .challenge-completed { text-align:center; padding:10px 0 4px; }
+  .challenge-completed .trophy { font-size:2rem; display:block; margin-bottom:4px; }
+  .challenge-completed p { font-size:.82rem; font-weight:700; color:var(--teal); }
+
+  /* ── RECURRING BANNER ── */
+  .recurring-banner { background:var(--purple-light); border:1.5px solid rgba(108,99,255,0.2); border-radius:14px; padding:14px 16px; margin-bottom:22px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:border-color .18s; animation:fadeUp .35s ease both; }
+  .recurring-banner:hover { border-color:var(--purple); }
+  .recurring-banner-icon { width:38px; height:38px; border-radius:10px; background:rgba(108,99,255,0.15); color:var(--purple); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .recurring-banner-body { flex:1; }
+  .recurring-banner-title { font-size:.85rem; font-weight:700; color:var(--purple); margin-bottom:2px; }
+  .recurring-banner-sub   { font-size:.74rem; color:var(--muted); }
+
+  /* ── SECTIONS ── */
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .section-title  { font-size:.95rem; font-weight:700; }
+  .section-link   { font-size:.78rem; color:var(--teal); font-weight:600; cursor:pointer; }
+
+  /* ── TX LIST ── */
+  .tx-list { display:flex; flex-direction:column; gap:9px; padding-bottom:24px; }
+  .tx-item { background:var(--card); border-radius:13px; padding:13px 15px; display:flex; align-items:center; gap:13px; box-shadow:var(--shadow); border:1px solid var(--border); transition:transform .15s,border-color .15s; animation:fadeUp .35s ease both; position:relative; cursor:pointer; }
+  .tx-item:hover { transform:translateX(3px); border-color:var(--teal); }
+  .tx-recurring-badge { position:absolute; top:8px; right:10px; font-size:.6rem; font-weight:700; color:var(--purple); background:var(--purple-light); padding:2px 6px; border-radius:20px; letter-spacing:.03em; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .tx-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem; }
+  .tx-info { flex:1; min-width:0; }
+  .tx-name { font-size:.88rem; font-weight:600; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tx-cat  { font-size:.73rem; color:var(--muted); }
+  .tx-date { font-size:.7rem; color:var(--muted); }
+  .tx-amount { font-weight:700; font-size:.9rem; letter-spacing:-.01em; font-family:Arial,Helvetica,sans-serif; }
+  .tx-amount.credit { color:var(--teal); } .tx-amount.debit { color:var(--red); } .tx-amount.save { color:var(--yellow); }
+
+  /* ── DETAIL HERO ── */
+  .detail-hero { border-radius:var(--radius); padding:22px; color:#fff; margin-bottom:18px; text-align:center; background:linear-gradient(135deg,var(--teal),var(--teal-dark)); }
+  .detail-hero.red    { background:linear-gradient(135deg,#ff5a5f,#e03040); }
+  .detail-hero.yellow { background:linear-gradient(135deg,#f5a623,#d9890a); }
+  .detail-hero.navy   { background:linear-gradient(135deg,#1e4040,#0d2020); }
+  .detail-hero-label  { font-size:.75rem; opacity:.8; margin-bottom:5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .detail-hero-amount { font-size:2.6rem; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; line-height:1; font-family:Arial,Helvetica,sans-serif; }
+  .detail-hero-sub    { font-size:.78rem; opacity:.7; font-weight:500; }
+
+  /* ── MONTH TABS ── */
+  .month-tabs { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px; scrollbar-width:none; }
+  .month-tabs::-webkit-scrollbar { display:none; }
+  .month-tab { flex-shrink:0; padding:7px 15px; border-radius:20px; border:1.5px solid var(--border); background:var(--card); font-family:inherit; font-size:.78rem; font-weight:600; color:var(--muted); cursor:pointer; transition:all .18s; }
+  .month-tab.active { background:var(--teal); border-color:var(--teal); color:#fff; }
+
+  /* ── SAVING GOAL ── */
+  .saving-goal-card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:18px; box-shadow:var(--shadow); border:1px solid var(--border); }
+
+  /* ── MODALS ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:var(--overlay); backdrop-filter:blur(4px); z-index:200; align-items:flex-end; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--card); border-radius:22px 22px 0 0; padding:26px 22px 36px; width:100%; max-width:520px; animation:slideUp .3s cubic-bezier(.22,1,.36,1); border-top:1px solid var(--border); max-height:90vh; overflow-y:auto; }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .modal-drag  { width:38px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 20px; }
+  .modal-title { font-size:1.1rem; font-weight:800; margin-bottom:18px; letter-spacing:-.02em; }
+  .form-group  { margin-bottom:14px; }
+  .form-label  { font-size:.71rem; font-weight:700; color:var(--muted); margin-bottom:5px; display:block; letter-spacing:.05em; text-transform:uppercase; }
+  .form-input, .form-select { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:11px; font-family:inherit; font-size:.9rem; background:var(--input-bg); color:var(--text); transition:border .2s,background .25s; outline:none; appearance:none; }
+  .form-input:focus, .form-select:focus { border-color:var(--teal); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .btn-submit { width:100%; background:var(--teal); color:#fff; border:none; border-radius:13px; padding:14px; font-family:inherit; font-size:.92rem; font-weight:700; cursor:pointer; margin-top:4px; letter-spacing:-.01em; transition:background .2s,transform .15s; }
+  .btn-submit:hover { background:var(--teal-dark); }
+
+  /* recurring toggle in modal */
+  .recurring-toggle-row { display:flex; align-items:center; justify-content:space-between; background:var(--input-bg); border:1.5px solid var(--border); border-radius:11px; padding:12px 14px; margin-bottom:14px; cursor:pointer; transition:border .2s; }
+  .recurring-toggle-row:hover { border-color:var(--purple); }
+  .recurring-toggle-label { font-size:.85rem; font-weight:600; display:flex; align-items:center; gap:8px; }
+
+  /* ── SETTINGS ── */
+  .settings-section { background:var(--card); border-radius:var(--radius); padding:4px 0; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); overflow:hidden; }
+  .settings-label { font-size:.68rem; font-weight:700; color:var(--muted); padding:14px 18px 6px; letter-spacing:.07em; text-transform:uppercase; }
+  .settings-row { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-top:1px solid var(--border); transition:background .15s; cursor:default; }
+  .settings-row:first-of-type { border-top:none; }
+  .settings-row:hover { background:var(--input-bg); }
+  .settings-row-left { display:flex; align-items:center; gap:12px; }
+  .settings-row-icon { width:36px; height:36px; border-radius:10px; background:var(--green-light); color:var(--teal); display:flex; align-items:center; justify-content:center; }
+  .settings-row-title { font-size:.88rem; font-weight:600; }
+  .settings-row-sub   { font-size:.73rem; color:var(--muted); margin-top:1px; }
+  .toggle { position:relative; width:46px; height:26px; cursor:pointer; flex-shrink:0; }
+  .toggle input { opacity:0; width:0; height:0; position:absolute; }
+  .toggle-track { position:absolute; inset:0; border-radius:26px; background:var(--border); transition:background .25s; }
+  .toggle input:checked + .toggle-track { background:var(--teal); }
+  .toggle-thumb { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .25s; box-shadow:0 1px 4px rgba(0,0,0,0.2); pointer-events:none; }
+  .toggle input:checked ~ .toggle-thumb { transform:translateX(20px); }
+  .currency-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 18px 16px; }
+  .currency-btn { padding:10px 6px; border-radius:10px; border:1.5px solid var(--border); background:var(--input-bg); font-family:inherit; font-size:.78rem; font-weight:600; color:var(--muted); cursor:pointer; text-align:center; transition:all .18s; line-height:1.4; }
+  .currency-btn span { display:block; font-size:1.05rem; margin-bottom:2px; }
+  .currency-btn:hover { border-color:var(--teal); color:var(--teal); }
+  .currency-btn.active { border-color:var(--teal); background:var(--green-light); color:var(--teal); }
+
+  /* ── RECURRING MODAL LIST ── */
+  .rec-item { background:var(--input-bg); border-radius:11px; padding:13px 14px; display:flex; align-items:center; gap:12px; margin-bottom:9px; border:1px solid var(--border); }
+  .rec-info { flex:1; }
+  .rec-name { font-size:.85rem; font-weight:600; margin-bottom:2px; }
+  .rec-amount { font-size:.8rem; color:var(--muted); }
+  .rec-confirm-btn { padding:6px 12px; border-radius:8px; border:1.5px solid var(--border); background:var(--card); font-family:inherit; font-size:.74rem; font-weight:700; color:var(--purple); cursor:pointer; transition:all .18s; white-space:nowrap; }
+  .rec-confirm-btn:hover { border-color:var(--purple); background:var(--purple-light); }
+  .rec-confirm-btn.confirmed { background:var(--purple); color:#fff; border-color:var(--purple); }
+
+  /* ── FAB ── */
+  .fab { position:fixed; bottom:26px; right:22px; width:52px; height:52px; border-radius:50%; background:var(--teal); color:#fff; border:none; box-shadow:0 6px 20px var(--teal-glow); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.5rem; transition:transform .2s,box-shadow .2s; z-index:50; }
+  .fab:hover { transform:scale(1.08); box-shadow:0 10px 28px var(--teal-glow); }
+
+  /* ── LANGUAGE SELECTOR ── */
+  .lang-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 18px 16px; }
+  .lang-btn { padding:10px 6px; border-radius:10px; border:1.5px solid var(--border); background:var(--input-bg); font-family:inherit; font-size:.78rem; font-weight:600; color:var(--muted); cursor:pointer; text-align:center; transition:all .18s; line-height:1.5; }
+  .lang-btn span { display:block; font-size:1.1rem; margin-bottom:2px; }
+  .lang-btn:hover { border-color:var(--teal); color:var(--teal); }
+  .lang-btn.active { border-color:var(--teal); background:var(--green-light); color:var(--teal); }
+
+  /* ── EXPORT BTN ── */
+  .btn-export { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:var(--input-bg); color:var(--text); border:1.5px solid var(--border); border-radius:13px; padding:13px; font-family:inherit; font-size:.88rem; font-weight:700; cursor:pointer; transition:all .18s; margin-bottom:16px; }
+  .btn-export:hover { border-color:var(--teal); color:var(--teal); background:var(--green-light); }
+
+  /* ── EMPTY ── */
+  .empty { text-align:center; padding:40px 20px; color:var(--muted); }
+  .empty-icon { font-size:2.2rem; margin-bottom:8px; }
+  .empty p { font-size:.88rem; }
+
+  .tx-item:nth-child(1){animation-delay:.04s} .tx-item:nth-child(2){animation-delay:.08s}
+  .tx-item:nth-child(3){animation-delay:.13s} .tx-item:nth-child(4){animation-delay:.17s}
+  .tx-item:nth-child(5){animation-delay:.21s}
+</style>
+</head>
+<body>
+
+<!-- ══ ONBOARDING ══ -->
+<div id="page-onboarding" class="page">
+  <div class="ob-wrap">
+    <div class="ob-logo">
+      <svg width="140" height="36" viewBox="0 0 140 36" fill="none"><rect x="2" y="2" width="26" height="15" rx="7" fill="#2DD4A0"/><rect x="6" y="17" width="24" height="15" rx="7" fill="#0D9E6E"/><rect x="6" y="14" width="20" height="6" rx="3" fill="#1BBF85"/><text x="38" y="25" font-family="'Sora',Arial,sans-serif" font-size="20" font-weight="700" fill="#2DD4A0" letter-spacing="-0.5">savelo</text></svg>
+    </div>
+    <div class="ob-progress">
+      <div class="ob-dot active" id="dot-0"></div><div class="ob-dot" id="dot-1"></div><div class="ob-dot" id="dot-2"></div>
+    </div>
+    <div class="ob-step active" id="ob-step-0">
+      <div class="ob-headline">¿Cómo te llamas? 👋</div>
+      <div class="ob-sub">Tu nombre aparecerá en el saludo de bienvenida.</div>
+      <input class="ob-input" id="ob-name" type="text" placeholder="Ej. María, Carlos, Ana…" maxlength="30">
+      <button class="ob-btn" id="ob-next-0" onclick="obNext(1)" disabled>Continuar →</button>
+    </div>
+    <div class="ob-step" id="ob-step-1">
+      <div class="ob-headline">Elige tu avatar 🎨</div>
+      <div class="ob-sub">Dale personalidad a tu perfil.</div>
+      <div class="avatar-grid" id="ob-avatar-grid">
+        <div class="avatar-opt" data-emoji="😊" onclick="selectAvatar(this)">😊</div>
+        <div class="avatar-opt" data-emoji="🦁" onclick="selectAvatar(this)">🦁</div>
+        <div class="avatar-opt" data-emoji="🐬" onclick="selectAvatar(this)">🐬</div>
+        <div class="avatar-opt" data-emoji="🌟" onclick="selectAvatar(this)">🌟</div>
+        <div class="avatar-opt" data-emoji="🚀" onclick="selectAvatar(this)">🚀</div>
+        <div class="avatar-opt" data-emoji="🌸" onclick="selectAvatar(this)">🌸</div>
+        <div class="avatar-opt" data-emoji="🐙" onclick="selectAvatar(this)">🐙</div>
+        <div class="avatar-opt" data-emoji="🦊" onclick="selectAvatar(this)">🦊</div>
+        <div class="avatar-opt" data-emoji="🎯" onclick="selectAvatar(this)">🎯</div>
+        <div class="avatar-opt" data-emoji="💎" onclick="selectAvatar(this)">💎</div>
+      </div>
+      <button class="ob-btn" id="ob-next-1" onclick="obNext(2)" disabled>Continuar →</button>
+    </div>
+    <div class="ob-step" id="ob-step-2">
+      <div class="ob-headline">Tu moneda 💰</div>
+      <div class="ob-sub">Selecciona la moneda con la que gestionas tus finanzas.</div>
+      <div class="currency-grid-ob" id="ob-currency-grid">
+        <button class="currency-btn-ob" data-symbol="$" onclick="obSelectCurrency(this)"><span>🇺🇸</span>USD — $</button>
+        <button class="currency-btn-ob" data-symbol="€" onclick="obSelectCurrency(this)"><span>🇪🇺</span>EUR — €</button>
+        <button class="currency-btn-ob" data-symbol="£" onclick="obSelectCurrency(this)"><span>🇬🇧</span>GBP — £</button>
+        <button class="currency-btn-ob" data-symbol="MXN$" onclick="obSelectCurrency(this)"><span>🇲🇽</span>MXN</button>
+        <button class="currency-btn-ob" data-symbol="ARS$" onclick="obSelectCurrency(this)"><span>🇦🇷</span>ARS</button>
+        <button class="currency-btn-ob" data-symbol="COP$" onclick="obSelectCurrency(this)"><span>🇨🇴</span>COP</button>
+        <button class="currency-btn-ob" data-symbol="S/" onclick="obSelectCurrency(this)"><span>🇵🇪</span>PEN</button>
+        <button class="currency-btn-ob" data-symbol="CLP$" onclick="obSelectCurrency(this)"><span>🇨🇱</span>CLP</button>
+        <button class="currency-btn-ob" data-symbol="R$" onclick="obSelectCurrency(this)"><span>🇧🇷</span>BRL — R$</button>
+      </div>
+      <button class="ob-btn" id="ob-next-2" onclick="finishOnboarding()" disabled>¡Comenzar! 🎉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROFILES ══ -->
+<div id="page-profiles" class="page">
+  <div class="profiles-wrap">
+    <div style="text-align:center;margin-bottom:28px">
+      <svg width="140" height="36" viewBox="0 0 140 36" fill="none"><rect x="2" y="2" width="26" height="15" rx="7" fill="#2DD4A0"/><rect x="6" y="17" width="24" height="15" rx="7" fill="#0D9E6E"/><rect x="6" y="14" width="20" height="6" rx="3" fill="#1BBF85"/><text x="38" y="25" font-family="'Sora',Arial,sans-serif" font-size="20" font-weight="700" fill="#2DD4A0" letter-spacing="-0.5">savelo</text></svg>
+    </div>
+    <div class="profiles-headline">¿Quién está usando la app?</div>
+    <div class="profiles-sub">Selecciona tu perfil para continuar</div>
+    <div class="profile-list" id="profile-list"></div>
+    <button class="btn-new-profile" onclick="startOnboarding()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      Añadir nuevo perfil
+    </button>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="page-home" class="page">
+  <nav class="nav">
+    <a class="nav-logo" href="#" onclick="showPage('profiles');return false;">
+      <svg width="130" height="34" viewBox="0 0 130 34" fill="none"><rect x="2" y="2" width="26" height="15" rx="7" fill="#2DD4A0"/><rect x="6" y="17" width="24" height="15" rx="7" fill="#0D9E6E"/><rect x="6" y="14" width="20" height="6" rx="3" fill="#1BBF85"/><text x="38" y="24" class="logo-wordmark" font-family="'Sora',Arial,sans-serif" font-size="19" font-weight="700" fill="#0A7A52" letter-spacing="-0.5">savelo</text></svg>
+    </a>
+    <div class="nav-actions">
+      <div class="nav-icon-btn" onclick="showPage('settings')" title="Configuración">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="nav-avatar" id="home-nav-avatar" onclick="showPage('profiles')">👤</div>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="welcome-banner">
+      <div class="welcome-greeting" id="home-greeting">Buenos días 👋</div>
+      <div class="welcome-name" id="home-welcome-name">Hola</div>
+      <div class="insight-chip" id="home-insight-chip" style="display:none">✨ Has ahorrado <strong id="saving-pct-chip">&nbsp;—&nbsp;</strong> más que el mes pasado</div>
+    </div>
+
+    <button class="btn-add" id="home-add-btn" onclick="openModal('general')">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="17" height="17"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <span id="home-add-lbl">Añadir Transacción</span>
+    </button>
+
+    <div class="cards-grid">
+      <div class="stat-card card-balance" onclick="showPage('balance')">
+        <span class="card-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        <div class="stat-label" id="lbl-balance">Balance</div>
+        <div class="stat-value" id="h-balance">—</div>
+        <div class="stat-delta up" id="delta-balance" style="visibility:hidden">↑ —</div>
+      </div>
+      <div class="stat-card card-income" onclick="showPage('income')">
+        <span class="card-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        <div class="stat-label" id="lbl-income">Ingresos</div>
+        <div class="stat-value" id="h-income">—</div>
+        <div class="stat-delta up" id="delta-income" style="visibility:hidden">↑ —</div>
+      </div>
+      <div class="stat-card card-expense" onclick="showPage('expense')">
+        <span class="card-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        <div class="stat-label" id="lbl-expense">Gastos</div>
+        <div class="stat-value" id="h-expense">—</div>
+        <div class="stat-delta down" id="delta-expense" style="visibility:hidden">↑ —</div>
+      </div>
+      <div class="stat-card card-saving" onclick="showPage('saving')">
+        <span class="card-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></span>
+        <div class="stat-label" id="lbl-saving">Ahorro</div>
+        <div class="stat-value" id="h-saving">—</div>
+        <div class="stat-delta up" id="delta-saving" style="visibility:hidden">↑ —</div>
+      </div>
+    </div>
+
+    <!-- FORECAST -->
+    <div class="forecast-card" id="forecast-card" style="display:none">
+      <div class="forecast-header">
+        <span class="forecast-title" id="forecast-title-lbl">📅 Previsión de fin de mes</span>
+        <span class="forecast-badge" id="forecast-badge">—</span>
+      </div>
+      <div class="forecast-bar-wrap"><div class="forecast-bar" id="forecast-bar" style="width:0%"></div></div>
+      <div class="forecast-legend">
+        <span id="forecast-spent-label">Gastado</span>
+        <span id="forecast-income-label">Ingresado</span>
+      </div>
+      <div class="forecast-msg" id="forecast-msg"></div>
+    </div>
+
+    <!-- AI INSIGHTS -->
+    <div class="insights-section" id="insights-section" style="display:none">
+      <div class="section-header">
+        <span class="section-title" id="insights-title-lbl">🧠 Tu asesor financiero</span>
+      </div>
+      <div id="insights-list"></div>
+    </div>
+
+    <!-- RECURRING DETECTED -->
+    <div class="recurring-banner" id="recurring-banner" style="display:none" onclick="openRecurringModal()">
+      <div class="recurring-banner-icon">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </div>
+      <div class="recurring-banner-body">
+        <div class="recurring-banner-title" id="recurring-banner-title">Gastos recurrentes detectados</div>
+        <div class="recurring-banner-sub" id="recurring-banner-sub">Toca para revisar y confirmar</div>
+      </div>
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--purple);flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </div>
+
+    <!-- CHALLENGE -->
+    <div class="challenge-card" id="challenge-card" style="display:none">
+      <div class="challenge-header">
+        <span class="challenge-title" id="challenge-title-lbl">🏆 Reto semanal</span>
+        <span class="challenge-days" id="challenge-days-left"></span>
+      </div>
+      <div class="challenge-desc" id="challenge-desc"></div>
+      <div id="challenge-body"></div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title" id="home-recent-lbl">Movimientos recientes</span>
+      <span class="section-link" id="home-see-all-lbl" onclick="showPage('balance')">Ver todos →</span>
+    </div>
+    <div class="tx-list" id="home-tx-list"></div>
+  </div>
+</div>
+
+<!-- ══ BALANCE ══ -->
+<div id="page-balance" class="page">
+  <nav class="nav">
+    <button class="nav-back" onclick="showPage('home')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> <span class="back-lbl">Atrás</span></button>
+    <span class="nav-title" id="balance-nav-title">Balance</span><div style="width:52px"></div>
+  </nav>
+  <div class="content">
+    <div class="detail-hero navy">
+      <div class="detail-hero-label" id="balance-hero-label">Balance Total</div>
+      <div class="detail-hero-amount" id="d-balance-total">—</div>
+      <div class="detail-hero-sub" id="d-balance-month-label">Actualizado hoy</div>
+    </div>
+    <div class="month-tabs" id="balance-month-tabs"></div>
+    <div class="section-header"><span class="section-title" id="balance-all-moves">Todos los movimientos</span></div>
+    <div class="tx-list" id="balance-tx-list"></div>
+  </div>
+  <button class="fab" onclick="openModal('general')">+</button>
+</div>
+
+<!-- ══ INCOME ══ -->
+<div id="page-income" class="page">
+  <nav class="nav">
+    <button class="nav-back" onclick="showPage('home')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> <span class="back-lbl">Atrás</span></button>
+    <span class="nav-title" id="income-nav-title">Ingresos</span><div style="width:52px"></div>
+  </nav>
+  <div class="content">
+    <div class="detail-hero">
+      <div class="detail-hero-label" id="income-hero-label">Ingresos del mes</div>
+      <div class="detail-hero-amount" id="d-income-total">—</div>
+      <div class="detail-hero-sub" id="d-income-sub">—</div>
+    </div>
+    <button class="btn-add" id="income-add-btn" onclick="openModal('income')"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="17" height="17"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Añadir Ingreso</button>
+    <div class="month-tabs" id="income-month-tabs"></div>
+    <div class="section-header"><span class="section-title" id="income-history-title">Historial de ingresos</span></div>
+    <div class="tx-list" id="income-tx-list"></div>
+  </div>
+</div>
+
+<!-- ══ EXPENSE ══ -->
+<div id="page-expense" class="page">
+  <nav class="nav">
+    <button class="nav-back" onclick="showPage('home')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> <span class="back-lbl">Atrás</span></button>
+    <span class="nav-title" id="expense-nav-title">Gastos</span><div style="width:52px"></div>
+  </nav>
+  <div class="content">
+    <div class="detail-hero red">
+      <div class="detail-hero-label" id="expense-hero-label">Gastos del mes</div>
+      <div class="detail-hero-amount" id="d-expense-total">—</div>
+      <div class="detail-hero-sub" id="d-expense-sub">—</div>
+    </div>
+    <button class="btn-add" id="expense-add-btn" onclick="openModal('expense')"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="17" height="17"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Añadir Gasto</button>
+    <div class="month-tabs" id="expense-month-tabs"></div>
+    <div class="section-header"><span class="section-title" id="expense-history-title">Historial de gastos</span></div>
+    <div class="tx-list" id="expense-tx-list"></div>
+  </div>
+</div>
+
+<!-- ══ SAVING ══ -->
+<div id="page-saving" class="page">
+  <nav class="nav">
+    <button class="nav-back" onclick="showPage('home')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> <span class="back-lbl">Atrás</span></button>
+    <span class="nav-title" id="saving-nav-title">Ahorro</span><div style="width:52px"></div>
+  </nav>
+  <div class="content">
+    <div class="detail-hero yellow">
+      <div class="detail-hero-label" id="saving-hero-label">Ahorro del mes</div>
+      <div class="detail-hero-amount" id="d-saving-total">—</div>
+      <div class="detail-hero-sub" id="d-saving-sub">—</div>
+    </div>
+    <div class="saving-goal-card" id="saving-goal-card" style="display:none">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:.85rem;font-weight:700" id="saving-goal-title">Objetivo mensual</span>
+        <span style="font-size:.85rem;font-weight:800;color:var(--yellow)" id="saving-goal-label">—</span>
+      </div>
+      <div style="height:7px;background:var(--border);border-radius:8px;overflow:hidden">
+        <div id="saving-goal-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#f5a623,#d9890a);border-radius:8px;transition:width .6s"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:6px" id="saving-goal-msg"></div>
+    </div>
+    <button class="btn-add" id="saving-add-btn" onclick="openModal('saving')"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="17" height="17"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Añadir Ahorro</button>
+    <div class="month-tabs" id="saving-month-tabs"></div>
+    <div class="section-header"><span class="section-title" id="saving-history-title">Historial de ahorros</span></div>
+    <div class="tx-list" id="saving-tx-list"></div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div id="page-settings" class="page">
+  <nav class="nav">
+    <button class="nav-back" onclick="showPage('home')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> <span id="settings-back-lbl">Atrás</span></button>
+    <span class="nav-title" id="settings-nav-title">Configuración</span><div style="width:52px"></div>
+  </nav>
+  <div class="content">
+    <div class="settings-section">
+      <div class="settings-label" id="settings-label-profile">Mi Perfil</div>
+      <div class="settings-row" style="cursor:pointer" onclick="openEditProfile()">
+        <div class="settings-row-left">
+          <div class="settings-row-icon" style="font-size:1.25rem;background:transparent" id="settings-avatar-icon">👤</div>
+          <div>
+            <div class="settings-row-title" id="settings-profile-name">—</div>
+            <div class="settings-row-sub" id="settings-profile-currency">—</div>
+          </div>
+        </div>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label" id="settings-label-appearance">Apariencia</div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-row-icon"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></div>
+          <div>
+            <div class="settings-row-title" id="settings-dark-title">Modo oscuro</div>
+            <div class="settings-row-sub" id="theme-sub">Actualmente: claro</div>
+          </div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="dark-toggle" onchange="toggleTheme()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label" id="settings-label-currency">Moneda</div>
+      <div style="padding:6px 18px 2px;font-size:.8rem;color:var(--muted)" id="settings-currency-sub">Selecciona la moneda que se mostrará en toda la aplicación.</div>
+      <div class="currency-grid" id="currency-grid">
+        <button class="currency-btn active" data-symbol="$" onclick="setCurrency(this)"><span>🇺🇸</span>USD — $</button>
+        <button class="currency-btn" data-symbol="€" onclick="setCurrency(this)"><span>🇪🇺</span>EUR — €</button>
+        <button class="currency-btn" data-symbol="£" onclick="setCurrency(this)"><span>🇬🇧</span>GBP — £</button>
+        <button class="currency-btn" data-symbol="MXN$" onclick="setCurrency(this)"><span>🇲🇽</span>MXN</button>
+        <button class="currency-btn" data-symbol="ARS$" onclick="setCurrency(this)"><span>🇦🇷</span>ARS</button>
+        <button class="currency-btn" data-symbol="COP$" onclick="setCurrency(this)"><span>🇨🇴</span>COP</button>
+        <button class="currency-btn" data-symbol="S/" onclick="setCurrency(this)"><span>🇵🇪</span>PEN — S/</button>
+        <button class="currency-btn" data-symbol="CLP$" onclick="setCurrency(this)"><span>🇨🇱</span>CLP</button>
+        <button class="currency-btn" data-symbol="R$" onclick="setCurrency(this)"><span>🇧🇷</span>BRL — R$</button>
+      </div>
+    </div>
+    <div class="settings-section" id="settings-lang-section">
+      <div class="settings-label" id="settings-lang-label">Idioma</div>
+      <div style="padding:6px 18px 2px;font-size:.8rem;color:var(--muted)" id="settings-lang-sub">Selecciona el idioma de la aplicación.</div>
+      <div class="lang-grid">
+        <button class="lang-btn" data-lang="es" onclick="setLang('es')"><span>🇪🇸</span>Español</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')"><span>🇬🇧</span>English</button>
+        <button class="lang-btn" data-lang="pt" onclick="setLang('pt')"><span>🇧🇷</span>Português</button>
+        <button class="lang-btn" data-lang="fr" onclick="setLang('fr')"><span>🇫🇷</span>Français</button>
+        <button class="lang-btn" data-lang="de" onclick="setLang('de')"><span>🇩🇪</span>Deutsch</button>
+        <button class="lang-btn" data-lang="it" onclick="setLang('it')"><span>🇮🇹</span>Italiano</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label" id="settings-profiles-label">Perfiles</div>
+      <div class="settings-row" style="cursor:pointer" onclick="showPage('profiles')">
+        <div class="settings-row-left">
+          <div class="settings-row-icon"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+          <div>
+            <div class="settings-row-title" id="settings-switch-title">Cambiar de perfil</div>
+            <div class="settings-row-sub" id="settings-switch-sub">Ver todos los perfiles</div>
+          </div>
+        </div>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </div>
+      <div class="settings-row" style="cursor:pointer" onclick="confirmDeleteProfile()">
+        <div class="settings-row-left">
+          <div class="settings-row-icon" style="background:var(--red-light);color:var(--red)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+          <div class="settings-row-title" style="color:var(--red)" id="settings-delete-title">Eliminar este perfil</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-export" onclick="exportPDF()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span id="export-btn-lbl">Exportar resumen mensual (PDF)</span>
+    </button>
+    <div style="text-align:center;padding:4px 0 8px;color:var(--muted);font-size:.73rem">Savelo v3.0.0</div>
+  </div>
+</div>
+
+<!-- ══ TRANSACTION MODAL ══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="modal-title">Añadir Transacción</div>
+    <div class="form-group">
+      <label class="form-label" id="modal-lbl-desc">Descripción</label>
+      <input id="f-desc" class="form-input" type="text" placeholder="Ej. Sueldo, Supermercado…">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" id="modal-lbl-amount">Cantidad</label>
+        <input id="f-amount" class="form-input" type="number" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="modal-lbl-type">Tipo</label>
+        <select id="f-type" class="form-select" onchange="updateCategoryOptions()">
+          <option value="income" id="opt-income">Ingreso</option>
+          <option value="expense" id="opt-expense">Gasto</option>
+          <option value="saving" id="opt-saving">Ahorro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="modal-lbl-cat">Categoría</label>
+      <select id="f-cat" class="form-select"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="modal-lbl-date">Fecha</label>
+      <input id="f-date" class="form-input" type="date">
+    </div>
+    <!-- Recurring toggle - SOLO para Gastos -->
+    <div class="recurring-toggle-row" id="recurring-toggle-row" style="display:none" onclick="toggleRecurring()">
+      <span class="recurring-toggle-label">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--purple)"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span id="modal-recurring-lbl">Es un gasto recurrente</span>
+      </span>
+      <label class="toggle" style="pointer-events:none">
+        <input type="checkbox" id="f-recurring">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+    <input type="hidden" id="f-edit-id" value="">
+    <button class="btn-submit" id="modal-submit-btn" onclick="addTransaction()">Guardar movimiento</button>
+  </div>
+</div>
+
+<!-- ══ EDIT PROFILE MODAL ══ -->
+<div class="modal-overlay" id="edit-profile-modal" onclick="closeEditModal(event)">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="edit-profile-title">Editar Perfil</div>
+    <div class="form-group">
+      <label class="form-label" id="ep-lbl-name">Nombre</label>
+      <input id="ep-name" class="form-input" type="text" placeholder="Tu nombre" maxlength="30">
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="ep-lbl-avatar">Avatar</label>
+      <div class="avatar-grid" id="ep-avatar-grid">
+        <div class="avatar-opt" data-emoji="😊" onclick="epSelectAvatar(this)">😊</div>
+        <div class="avatar-opt" data-emoji="🦁" onclick="epSelectAvatar(this)">🦁</div>
+        <div class="avatar-opt" data-emoji="🐬" onclick="epSelectAvatar(this)">🐬</div>
+        <div class="avatar-opt" data-emoji="🌟" onclick="epSelectAvatar(this)">🌟</div>
+        <div class="avatar-opt" data-emoji="🚀" onclick="epSelectAvatar(this)">🚀</div>
+        <div class="avatar-opt" data-emoji="🌸" onclick="epSelectAvatar(this)">🌸</div>
+        <div class="avatar-opt" data-emoji="🐙" onclick="epSelectAvatar(this)">🐙</div>
+        <div class="avatar-opt" data-emoji="🦊" onclick="epSelectAvatar(this)">🦊</div>
+        <div class="avatar-opt" data-emoji="🎯" onclick="epSelectAvatar(this)">🎯</div>
+        <div class="avatar-opt" data-emoji="💎" onclick="epSelectAvatar(this)">💎</div>
+      </div>
+    </div>
+    <button class="btn-submit" id="ep-save-btn" onclick="saveEditProfile()">Guardar cambios</button>
+  </div>
+</div>
+
+<!-- ══ EDIT TRANSACTION MODAL ══ -->
+<div class="modal-overlay" id="edit-transaction-modal" onclick="closeEditTransactionModal(event)">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="edit-transaction-title">Editar Transacción</div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input id="edit-desc" class="form-input" type="text">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Cantidad</label>
+        <input id="edit-amount" class="form-input" type="number" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <select id="edit-cat" class="form-select"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input id="edit-date" class="form-input" type="date">
+    </div>
+    <input type="hidden" id="edit-transaction-id">
+    <button class="btn-submit" onclick="saveTransactionEdit()">Guardar cambios</button>
+    <button class="btn-submit" style="background:var(--red);margin-top:8px" onclick="deleteTransaction()">Eliminar transacción</button>
+  </div>
+</div>
+
+<!-- ══ RECURRING MODAL ══ -->
+<div class="modal-overlay" id="recurring-modal" onclick="closeRecurringModal(event)">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="recurring-modal-title">🔁 Recurrentes detectados</div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:18px;line-height:1.5" id="recurring-modal-sub">Hemos detectado estos movimientos que se repiten. Confírmalos para que Savelo los añada automáticamente cada mes.</p>
+    <div id="recurring-modal-list"></div>
+    <button class="btn-submit" style="margin-top:8px" id="recurring-done-btn" onclick="closeRecurringModalDirect()">Listo</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// I18N — MULTI-LANGUAGE SYSTEM
+// Auto-detects device language, fallback: Spanish
+// Supported: es, en, pt, fr, de, it
+// ══════════════════════════════════════════════════
+const SK_LANG = 'savelo_lang';
+
+function detectLang() {
+  const saved = localStorage.getItem(SK_LANG);
+  if (saved) return saved;
+  const nav = (navigator.language || navigator.userLanguage || 'es').toLowerCase().split('-')[0];
+  const supported = ['es','en','pt','fr','de','it'];
+  return supported.includes(nav) ? nav : 'es';
+}
+let currentLang = detectLang();
+
+const I18N = {
+  es: {
+    // Onboarding
+    ob0_h:'¿Cómo te llamas? 👋', ob0_s:'Tu nombre aparecerá en el saludo de bienvenida.', ob0_ph:'Ej. María, Carlos, Ana…', ob0_btn:'Continuar →',
+    ob1_h:'Elige tu avatar 🎨', ob1_s:'Dale personalidad a tu perfil.', ob1_btn:'Continuar →',
+    ob2_h:'Tu moneda 💰', ob2_s:'Selecciona la moneda con la que gestionas tus finanzas.', ob2_btn:'¡Comenzar! 🎉',
+    // Profiles
+    prof_h:'¿Quién está usando la app?', prof_s:'Selecciona tu perfil para continuar', btn_new_prof:'Añadir nuevo perfil',
+    // Nav
+    nav_back:'Atrás', nav_settings:'Configuración', nav_balance:'Balance', nav_income:'Ingresos', nav_expense:'Gastos', nav_saving:'Ahorro',
+    // Greetings - CORREGIDO
+    g_morning:'Buenos días 👋', g_afternoon:'Buenas tardes 👋', g_evening:'Buenas noches 👋', 
+    welcome_pre:'',  // Vacío porque el nombre se mostrará directamente
+    // Home
+    btn_add_tx:'Añadir Transacción', lbl_balance:'Balance', lbl_income:'Ingresos', lbl_expense:'Gastos', lbl_saving:'Ahorro',
+    recent:'Movimientos recientes', see_all:'Ver todos →',
+    chip:'✨ Has ahorrado', chip2:'más que el mes pasado',
+    // Forecast - CORREGIDO
+    fc_title:'📅 Previsión de fin de mes', 
+    fc_surplus:'✓ Superávit proyectado', 
+    fc_warn:'⚠ Límite ajustado', 
+    fc_deficit:'✗ Déficit proyectado',
+    fc_spent:'Gastado: ', 
+    fc_inc:'Ingresos: ',
+    fc_ok:'Si mantienes el ritmo actual, terminarás el mes con <strong>{V}</strong> de superávit. ¡Buen control!',
+    fc_w:'Estás cerca del límite. Se proyecta un déficit de <strong>{V}</strong> a fin de mes. Reduce algún gasto esta semana.',
+    fc_b:'Atención: el ritmo actual apunta a un déficit de <strong>{V}</strong>. Revisa tus gastos de ocio y restaurantes.',
+    // Insights
+    ins_title:'🧠 Tu asesor financiero',
+    ins_top:'Gasto principal', ins_habit:'Gran hábito', ins_tip:'Consejo', ins_warn:'Atención', ins_excel:'Excelente control', ins_dist:'Distribución',
+    ins_t_top:'Tu categoría con más gasto es <strong>{CAT}</strong>, representando el <strong>{PCT}%</strong> de todos tus gastos este mes ({AMT}).',
+    ins_t_habit:'Estás ahorrando el <strong>{PCT}%</strong> de tus ingresos. Los expertos recomiendan al menos un 20%. ¡Vas por muy buen camino!',
+    ins_t_tip:'Actualmente ahorras el <strong>{PCT}%</strong> de tus ingresos. Si llegas al 20% ({IDEAL}), en un año tendrías más de {YEAR} ahorrados.',
+    ins_t_warn:'Tus gastos son el <strong>{PCT}%</strong> de tus ingresos. Intenta reducir alguna categoría para aumentar tu margen de ahorro.',
+    ins_t_excel:'Gastas solo el <strong>{PCT}%</strong> de lo que ingresas. Tu disciplina financiera está por encima de la media.',
+    ins_t_dist:'Tus dos categorías con más gasto concentran el <strong>{PCT}%</strong> de tu presupuesto. Diversificar gastos da más control sobre tus finanzas.',
+    // Recurring
+    rec_title:'Gastos recurrentes detectados', rec_tap:'Toca para revisar y confirmar',
+    rec_modal_t:'🔁 Recurrentes detectados', rec_modal_s:'Hemos detectado estos movimientos que se repiten. Confírmalos para que Savelo los añada automáticamente cada mes.',
+    rec_done:'Listo', rec_confirm:'Confirmar', rec_confirmed:'✓ Confirmado', rec_detected:'× detectado',
+    // Challenge
+    ch_title:'🏆 Reto semanal', ch_days:' días', ch_done:'¡Reto completado esta semana!', ch_unit:'días sin gastos',
+    challenges:[
+      {type:'ocio',target:30,desc:'No gastar más de {T} en Ocio esta semana',cat:'Ocio'},
+      {type:'rest',target:40,desc:'Limitar gastos en Restaurantes a {T} esta semana',cat:'Restaurantes'},
+      {type:'save',target:50,desc:'Añadir al menos {T} al ahorro esta semana',cat:null},
+      {type:'noexpense',target:1,desc:'Pasar al menos 1 día sin ningún gasto',cat:null},
+      {type:'transport',target:20,desc:'Reducir transporte a menos de {T} esta semana',cat:'Transporte'},
+    ],
+    // Detail pages
+    d_balance_total:'Balance Total', d_updated:'Actualizado hoy', d_all:'Todos los movimientos',
+    d_income_month:'Ingresos del mes', d_add_income:'Añadir Ingreso', d_income_hist:'Historial de ingresos',
+    d_expense_month:'Gastos del mes', d_add_expense:'Añadir Gasto', d_expense_hist:'Historial de gastos',
+    d_saving_month:'Ahorro del mes', d_add_saving:'Añadir Ahorro', d_saving_hist:'Historial de ahorros',
+    d_goal:'Objetivo mensual', d_goal_done:'🎉 ¡Objetivo superado!', d_goal_great:'% del objetivo — ¡lo estás haciendo muy bien!', d_goal_pct:'% de tu objetivo mensual',
+    d_saving_yes:'¡{AMT} ahorrados en {M}!', d_saving_no:'Sin ahorros en {M}',
+    d_all_months:'Todos los meses', d_in_month:'{AMT} en {M}', d_spent_month:'{AMT} gastados en {M}',
+    // Modal
+    m_general:'Añadir Transacción', m_income:'Añadir Ingreso', m_expense:'Añadir Gasto', m_saving:'Añadir Ahorro',
+    lbl_desc:'Descripción', lbl_amount:'Cantidad', lbl_type:'Tipo', lbl_cat:'Categoría', lbl_date:'Fecha',
+    lbl_recurring:'Es un gasto recurrente', btn_save:'Guardar movimiento', btn_update:'Actualizar movimiento', ph_desc:'Ej. Sueldo, Supermercado…',
+    t_income:'Ingreso', t_expense:'Gasto', t_saving:'Ahorro',
+    // Categorías específicas por tipo - ACTUALIZADAS
+    income_cats:['💼 Sueldo / Salario', '💰 Freelance / Autónomo', '🏦 Intereses / Dividendos', '🎁 Regalos / Donaciones', '📦 Otros ingresos'],
+    expense_cats:['🛒 Supermercado', '🏠 Alquiler / Hipoteca', '💡 Luz / Electricidad', '💧 Agua', '📶 Internet / WiFi', '📱 Teléfono', '🚗 Transporte / Gasolina', '🍽️ Restaurantes', '💊 Salud / Farmacia', '🎬 Ocio / Entretenimiento', '👕 Ropa / Compras', '📦 Otros gastos'],
+    saving_cats:['💰 Cuenta de ahorros', '📈 Inversiones', '🏦 Depósito / Plazo fijo', '💎 Metales / Cripto', '🎯 Otros ahorros'],
+    // Edit profile
+    ep_title:'Editar Perfil', ep_name:'Nombre', ep_avatar:'Avatar', ep_ph:'Tu nombre', ep_save:'Guardar cambios',
+    // Settings
+    s_profile:'Mi Perfil', s_appearance:'Apariencia', s_dark:'Modo oscuro', s_dark_on:'Actualmente: oscuro', s_dark_off:'Actualmente: claro',
+    s_currency:'Moneda', s_currency_sub:'Selecciona la moneda que se mostrará en toda la aplicación.',
+    s_profiles:'Perfiles', s_switch:'Cambiar de perfil', s_switch_sub:'Ver todos los perfiles',
+    s_delete:'Eliminar este perfil', s_currency_lbl:'Moneda: ',
+    s_lang:'Idioma', s_lang_sub:'Selecciona el idioma de la aplicación.',
+    // PDF
+    pdf_sub:'Resumen financiero de {M} · {N}', pdf_desc:'Descripción', pdf_cat:'Categoría', pdf_date:'Fecha', pdf_amt:'Cantidad',
+    pdf_empty:'Sin movimientos este mes', pdf_gen:'Generado el {D} con Savelo v3.0.0',
+    btn_export:'Exportar resumen mensual (PDF)', popup_alert:'Permite las ventanas emergentes para exportar el PDF.',
+    // Alerts
+    alert_last:'No puedes eliminar el único perfil. Crea otro antes.',
+    alert_del:'¿Eliminar este perfil y todos sus datos? Esta acción no se puede deshacer.',
+    alert_delete_tx:'¿Eliminar esta transacción? Esta acción no se puede deshacer.',
+    // Empty
+    empty_month:'No hay registros para este mes', empty_start:'¡Empieza a registrar!',
+    empty_start_sub:'Añade tu primer movimiento con el botón de arriba para ver tus estadísticas aquí.',
+    // Misc
+    months:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+    locale:'es-ES', prof_balance:'Balance', prof_moves:'movimientos',
+    // Edit transaction
+    edit_tx:'Editar Transacción', delete_tx:'Eliminar transacción',
+  },
+  // ... otros idiomas se mantienen igual pero con las mismas estructuras de categorías
+  en: {
+    // Versión simplificada para el ejemplo - mantén la misma estructura que español pero traducida
+    ob0_h:"What's your name? 👋", ob0_s:'Your name will appear in the welcome greeting.', ob0_ph:'E.g. Mary, John, Alex…', ob0_btn:'Continue →',
+    ob1_h:'Choose your avatar 🎨', ob1_s:'Give your profile some personality.', ob1_btn:'Continue →',
+    ob2_h:'Your currency 💰', ob2_s:'Select the currency you use to manage your finances.', ob2_btn:"Let's go! 🎉",
+    prof_h:'Who is using the app?', prof_s:'Select your profile to continue', btn_new_prof:'Add new profile',
+    nav_back:'Back', nav_settings:'Settings', nav_balance:'Balance', nav_income:'Income', nav_expense:'Expenses', nav_saving:'Savings',
+    g_morning:'Good morning 👋', g_afternoon:'Good afternoon 👋', g_evening:'Good evening 👋', 
+    welcome_pre:'',  // Vacío
+    btn_add_tx:'Add Transaction', lbl_balance:'Balance', lbl_income:'Income', lbl_expense:'Expenses', lbl_saving:'Savings',
+    recent:'Recent transactions', see_all:'See all →',
+    chip:'✨ You saved', chip2:'more than last month',
+    fc_title:'📅 Month-end forecast', fc_surplus:'✓ Projected surplus', fc_warn:'⚠ Near limit', fc_deficit:'✗ Projected deficit',
+    fc_spent:'Spent: ', fc_inc:'Income: ',
+    fc_ok:'At your current pace, you will end the month with a surplus of <strong>{V}</strong>. Great control!',
+    fc_w:"You're near the limit. A deficit of <strong>{V}</strong> is projected by month end. Cut some spending this week.",
+    fc_b:'Warning: at your current rate a deficit of <strong>{V}</strong> is projected. Review leisure and dining expenses.',
+    ins_title:'🧠 Your financial advisor',
+    ins_top:'Top expense', ins_habit:'Great habit', ins_tip:'Tip', ins_warn:'Warning', ins_excel:'Excellent control', ins_dist:'Distribution',
+    ins_t_top:'Your top spending category is <strong>{CAT}</strong>, representing <strong>{PCT}%</strong> of all your expenses this month ({AMT}).',
+    ins_t_habit:"You're saving <strong>{PCT}%</strong> of your income. Experts recommend at least 20%. You're on the right track!",
+    ins_t_tip:"You currently save <strong>{PCT}%</strong> of your income. Reaching 20% ({IDEAL}) would give you over {YEAR} saved in a year.",
+    ins_t_warn:'Your expenses are <strong>{PCT}%</strong> of your income. Try reducing a category to increase your savings margin.',
+    ins_t_excel:"You spend only <strong>{PCT}%</strong> of what you earn. Your financial discipline is above average.",
+    ins_t_dist:'Your two highest expense categories account for <strong>{PCT}%</strong> of your budget. Diversifying helps you gain more financial control.',
+    rec_title:'Recurring expenses detected', rec_tap:'Tap to review and confirm',
+    rec_modal_t:'🔁 Recurring detected', rec_modal_s:'We detected these repeated transactions. Confirm them so Savelo adds them automatically each month.',
+    rec_done:'Done', rec_confirm:'Confirm', rec_confirmed:'✓ Confirmed', rec_detected:'× detected',
+    ch_title:'🏆 Weekly challenge', ch_days:' days', ch_done:'Challenge completed this week!', ch_unit:'days without expenses',
+    challenges:[
+      {type:'ocio',target:30,desc:'Spend no more than {T} on Leisure this week',cat:'Ocio'},
+      {type:'rest',target:40,desc:'Limit Restaurants spending to {T} this week',cat:'Restaurantes'},
+      {type:'save',target:50,desc:'Add at least {T} to savings this week',cat:null},
+      {type:'noexpense',target:1,desc:'Go at least 1 day without any expenses',cat:null},
+      {type:'transport',target:20,desc:'Keep transport below {T} this week',cat:'Transporte'},
+    ],
+    d_balance_total:'Total Balance', d_updated:'Updated today', d_all:'All transactions',
+    d_income_month:'Monthly income', d_add_income:'Add Income', d_income_hist:'Income history',
+    d_expense_month:'Monthly expenses', d_add_expense:'Add Expense', d_expense_hist:'Expense history',
+    d_saving_month:'Monthly savings', d_add_saving:'Add Saving', d_saving_hist:'Savings history',
+    d_goal:'Monthly goal', d_goal_done:'🎉 Goal exceeded!', d_goal_great:'% of goal — you are doing great!', d_goal_pct:'% of your monthly goal',
+    d_saving_yes:'{AMT} saved in {M}!', d_saving_no:'No savings in {M}',
+    d_all_months:'All months', d_in_month:'{AMT} in {M}', d_spent_month:'{AMT} spent in {M}',
+    m_general:'Add Transaction', m_income:'Add Income', m_expense:'Add Expense', m_saving:'Add Saving',
+    lbl_desc:'Description', lbl_amount:'Amount', lbl_type:'Type', lbl_cat:'Category', lbl_date:'Date',
+    lbl_recurring:'This is a recurring expense', btn_save:'Save transaction', btn_update:'Update transaction', ph_desc:'E.g. Salary, Groceries…',
+    t_income:'Income', t_expense:'Expense', t_saving:'Saving',
+    income_cats:['💼 Salary', '💰 Freelance', '🏦 Interests', '🎁 Gifts', '📦 Other income'],
+    expense_cats:['🛒 Groceries', '🏠 Rent', '💡 Electricity', '💧 Water', '📶 Internet', '📱 Phone', '🚗 Transport', '🍽️ Restaurants', '💊 Health', '🎬 Leisure', '👕 Shopping', '📦 Other'],
+    saving_cats:['💰 Savings account', '📈 Investments', '🏦 Deposit', '💎 Metals/Crypto', '🎯 Other savings'],
+    ep_title:'Edit Profile', ep_name:'Name', ep_avatar:'Avatar', ep_ph:'Your name', ep_save:'Save changes',
+    s_profile:'My Profile', s_appearance:'Appearance', s_dark:'Dark mode', s_dark_on:'Currently: dark', s_dark_off:'Currently: light',
+    s_currency:'Currency', s_currency_sub:'Select the currency to display throughout the app.',
+    s_profiles:'Profiles', s_switch:'Switch profile', s_switch_sub:'See all profiles',
+    s_delete:'Delete this profile', s_currency_lbl:'Currency: ',
+    s_lang:'Language', s_lang_sub:'Select the app language.',
+    pdf_sub:'Financial summary for {M} · {N}', pdf_desc:'Description', pdf_cat:'Category', pdf_date:'Date', pdf_amt:'Amount',
+    pdf_empty:'No transactions this month', pdf_gen:'Generated on {D} with Savelo v3.0.0',
+    btn_export:'Export monthly summary (PDF)', popup_alert:'Please allow pop-ups to export the PDF.',
+    alert_last:'You cannot delete the only profile. Create another one first.',
+    alert_del:'Delete this profile and all its data? This cannot be undone.',
+    alert_delete_tx:'Delete this transaction? This cannot be undone.',
+    empty_month:'No records for this month', empty_start:'Start tracking!',
+    empty_start_sub:'Add your first transaction using the button above to see your stats here.',
+    months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    locale:'en-US', prof_balance:'Balance', prof_moves:'transactions',
+    edit_tx:'Edit Transaction', delete_tx:'Delete transaction',
+  }
+  // ... pt, fr, de, it mantienen la misma estructura
+};
+
+function L(key) {
+  const d = I18N[currentLang] || I18N['en'];
+  return d[key] !== undefined ? d[key] : (I18N['en'][key] || key);
+}
+
+// Translate a stored category string to the current language.
+// Categories are stored as "emoji Name" strings. We find the matching
+// category by checking every language's cat arrays (matching on emoji
+// or full string), then return the current language's equivalent.
+function translateCat(storedCat) {
+  if (!storedCat) return storedCat;
+  const catTypes = ['income_cats', 'expense_cats', 'saving_cats'];
+  const langs = Object.keys(I18N);
+  for (const type of catTypes) {
+    // Find index in any language
+    for (const lang of langs) {
+      const arr = I18N[lang][type];
+      if (!arr) continue;
+      const idx = arr.findIndex(c => c === storedCat || c.split(' ')[0] === storedCat.split(' ')[0]);
+      if (idx !== -1) {
+        // Found it — return current language equivalent (or fallback to English, or original)
+        const cur = L(type);
+        if (cur && cur[idx]) return cur[idx];
+        const en = (I18N['en'][type] || [])[idx];
+        return en || storedCat;
+      }
+    }
+  }
+  return storedCat; // Unknown category, return as-is
+}
+
+// Get just the display name (no emoji) of a translated category
+function catName(storedCat) {
+  return translateCat(storedCat).replace(/^\S+\s/, '');
+}
+
+// Get just the emoji of a category
+function catEmoji(storedCat) {
+  return storedCat ? storedCat.split(' ')[0] : '📦';
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem(SK_LANG, lang);
+  applyTranslations();
+  renderAll();
+  ['balance','income','expense','saving'].forEach(k => renderDetailPage(k));
+}
+
+function applyTranslations() {
+  // Helper
+  const set = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+  const setHTML = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
+
+  // Onboarding
+  document.querySelectorAll('#ob-step-0 .ob-headline').forEach(e=>e.textContent=L('ob0_h'));
+  document.querySelectorAll('#ob-step-0 .ob-sub').forEach(e=>e.textContent=L('ob0_s'));
+  const obName = document.getElementById('ob-name'); if(obName) obName.placeholder = L('ob0_ph');
+  set('ob-next-0', L('ob0_btn'));
+  document.querySelectorAll('#ob-step-1 .ob-headline').forEach(e=>e.textContent=L('ob1_h'));
+  document.querySelectorAll('#ob-step-1 .ob-sub').forEach(e=>e.textContent=L('ob1_s'));
+  set('ob-next-1', L('ob1_btn'));
+  document.querySelectorAll('#ob-step-2 .ob-headline').forEach(e=>e.textContent=L('ob2_h'));
+  document.querySelectorAll('#ob-step-2 .ob-sub').forEach(e=>e.textContent=L('ob2_s'));
+  set('ob-next-2', L('ob2_btn'));
+  // Profiles
+  document.querySelectorAll('.profiles-headline').forEach(e=>e.textContent=L('prof_h'));
+  document.querySelectorAll('.profiles-sub').forEach(e=>e.textContent=L('prof_s'));
+  const btnNewProf = document.querySelector('.btn-new-profile');
+  if(btnNewProf) { const svg=btnNewProf.querySelector('svg'); btnNewProf.innerHTML=''; if(svg)btnNewProf.appendChild(svg); btnNewProf.appendChild(document.createTextNode(' '+L('btn_new_prof'))); }
+  // Back buttons
+  document.querySelectorAll('.back-lbl').forEach(e=>e.textContent=L('nav_back'));
+  // Home nav
+  set('settings-back-lbl', L('nav_back'));
+  set('settings-nav-title', L('nav_settings'));
+  // Home page
+  set('home-add-lbl', L('btn_add_tx'));
+  set('lbl-balance', L('lbl_balance'));
+  set('lbl-income', L('lbl_income'));
+  set('lbl-expense', L('lbl_expense'));
+  set('lbl-saving', L('lbl_saving'));
+  set('home-recent-lbl', L('recent'));
+  set('home-see-all-lbl', L('see_all'));
+  set('forecast-title-lbl', L('fc_title'));
+  set('insights-title-lbl', L('ins_title'));
+  set('recurring-banner-title', L('rec_title'));
+  set('challenge-title-lbl', L('ch_title'));
+  // Detail pages nav
+  set('balance-nav-title', L('nav_balance'));
+  set('income-nav-title', L('nav_income'));
+  set('expense-nav-title', L('nav_expense'));
+  set('saving-nav-title', L('nav_saving'));
+  set('balance-hero-label', L('d_balance_total'));
+  set('balance-all-moves', L('d_all'));
+  set('income-hero-label', L('d_income_month'));
+  set('income-history-title', L('d_income_hist'));
+  set('expense-hero-label', L('d_expense_month'));
+  set('expense-history-title', L('d_expense_hist'));
+  set('saving-hero-label', L('d_saving_month'));
+  set('saving-history-title', L('d_saving_hist'));
+  set('saving-goal-title', L('d_goal'));
+  // Add buttons
+  const mkBtn = (id, lbl) => { const b=document.getElementById(id); if(b){const svg=b.querySelector('svg');b.innerHTML='';if(svg)b.appendChild(svg);b.appendChild(document.createTextNode(lbl));} };
+  mkBtn('income-add-btn', L('d_add_income'));
+  mkBtn('expense-add-btn', L('d_add_expense'));
+  mkBtn('saving-add-btn', L('d_add_saving'));
+  // Modal
+  set('modal-lbl-desc', L('lbl_desc'));
+  set('modal-lbl-amount', L('lbl_amount'));
+  set('modal-lbl-type', L('lbl_type'));
+  set('modal-lbl-cat', L('lbl_cat'));
+  set('modal-lbl-date', L('lbl_date'));
+  set('modal-recurring-lbl', L('lbl_recurring'));
+  set('opt-income', L('t_income'));
+  set('opt-expense', L('t_expense'));
+  set('opt-saving', L('t_saving'));
+  // Edit profile modal
+  set('edit-profile-title', L('ep_title'));
+  set('ep-lbl-name', L('ep_name'));
+  set('ep-lbl-avatar', L('ep_avatar'));
+  const epName = document.getElementById('ep-name'); if(epName) epName.placeholder = L('ep_ph');
+  set('ep-save-btn', L('ep_save'));
+  // Recurring modal
+  set('recurring-modal-title', L('rec_modal_t'));
+  set('recurring-modal-sub', L('rec_modal_s'));
+  set('recurring-done-btn', L('rec_done'));
+  // Settings
+  set('settings-label-profile', L('s_profile'));
+  set('settings-label-appearance', L('s_appearance'));
+  set('settings-dark-title', L('s_dark'));
+  set('settings-label-currency', L('s_currency'));
+  set('settings-currency-sub', L('s_currency_sub'));
+  set('settings-profiles-label', L('s_profiles'));
+  set('settings-switch-title', L('s_switch'));
+  set('settings-switch-sub', L('s_switch_sub'));
+  set('settings-delete-title', L('s_delete'));
+  set('settings-lang-label', L('s_lang'));
+  set('settings-lang-sub', L('s_lang_sub'));
+  set('export-btn-lbl', L('btn_export'));
+  // Edit transaction modal
+  set('edit-transaction-title', L('edit_tx'));
+  // Lang button active state
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===currentLang));
+  // Dark mode label update
+  const isDark = document.getElementById('dark-toggle')?.checked;
+  set('theme-sub', isDark ? L('s_dark_on') : L('s_dark_off'));
+
+  // Actualizar categorías en el modal
+  updateCategoryOptions();
+}
+
+// ══════════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════════
+const SK_PROFILES  = 'savelo_profiles';
+const SK_ACTIVE    = 'savelo_active_profile';
+const SK_CHALLENGE = 'savelo_challenge';
+
+function loadProfiles() { try { return JSON.parse(localStorage.getItem(SK_PROFILES))||[]; } catch { return []; } }
+function saveProfiles(p) { localStorage.setItem(SK_PROFILES, JSON.stringify(p)); }
+function getActiveId()   { return localStorage.getItem(SK_ACTIVE)||null; }
+function setActiveId(id) { localStorage.setItem(SK_ACTIVE, id); }
+function getActiveProfile() { const id=getActiveId(); return loadProfiles().find(p=>p.id===id)||null; }
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let currencySymbol = '$';
+let transactions   = [];
+let nextId = 1;
+let obData = { name:'', avatar:'', currency:'' };
+let confirmedRecurring = new Set();
+
+// ── MONTH FILTER STATE ──
+// selectedMonth: { year, month } (month = 1-12) or null for "all"
+// Each page has its own selected month.
+const pageMonthState = {
+  balance: null,
+  income:  null,
+  expense: null,
+  saving:  null
+};
+
+// ══════════════════════════════════════════════════
+// MONTH HELPERS
+// ══════════════════════════════════════════════════
+const MONTH_NAMES_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function getMonthNames() { return L('months') || MONTH_NAMES_ES; }
+
+/**
+ * Returns an array of { year, month } objects for all months that have
+ * at least one transaction, plus the current real month, sorted ascending.
+ * Always includes the current real month so users can always navigate to it.
+ */
+function getAvailableMonths() {
+  const today = new Date();
+  const monthSet = new Set();
+
+  // Add months from existing transactions
+  transactions.forEach(t => {
+    if (t.date) {
+      const d = new Date(t.date + 'T12:00:00');
+      monthSet.add(`${d.getFullYear()}-${d.getMonth()+1}`);
+    }
+  });
+
+  // Always include current real month
+  monthSet.add(`${today.getFullYear()}-${today.getMonth()+1}`);
+
+  // Parse and sort
+  const months = [...monthSet].map(key => {
+    const [y, m] = key.split('-').map(Number);
+    return { year: y, month: m };
+  });
+  months.sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month);
+  return months;
+}
+
+/**
+ * Filter transactions by a given { year, month }.
+ * If sel is null, returns all transactions.
+ */
+function filterByMonth(txs, sel) {
+  if (!sel) return txs;
+  return txs.filter(t => {
+    if (!t.date) return false;
+    const d = new Date(t.date + 'T12:00:00');
+    return d.getFullYear() === sel.year && d.getMonth()+1 === sel.month;
+  });
+}
+
+function getCurrentMonthSelection() {
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() + 1 };
+}
+
+function getCurrentMonthTransactions() {
+  return filterByMonth(transactions, getCurrentMonthSelection());
+}
+
+/**
+ * Compute stats for a given transaction set.
+ */
+function computeStats(txs) {
+  const income  = txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const saving  = txs.filter(t=>t.type==='saving').reduce((s,t)=>s+t.amount,0);
+  return { income, expense, saving, balance: income - expense - saving };
+}
+
+/**
+ * Build the month tabs HTML and wire up click handlers for a given page.
+ * pageKey: 'balance' | 'income' | 'expense' | 'saving'
+ */
+function buildMonthTabs(containerId, pageKey) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const months = getAvailableMonths();
+  const sel    = pageMonthState[pageKey];
+
+  // Default selection: current real month on first render
+  if (!pageMonthState[pageKey]) {
+    const today = new Date();
+    pageMonthState[pageKey] = { year: today.getFullYear(), month: today.getMonth()+1 };
+  }
+
+  const selNow = pageMonthState[pageKey];
+
+  container.innerHTML = months.map(m => {
+    const MN = getMonthNames();
+    const isActive = selNow && m.year === selNow.year && m.month === selNow.month;
+    const label = MN[m.month-1] + (months.some(x => x.year !== m.year) ? ` ${m.year}` : '');
+    return `<button class="month-tab${isActive?' active':''}"
+      onclick="selectMonth('${m.year}','${m.month}','${containerId.replace('-month-tabs','')}')">${label}</button>`;
+  }).join('');
+
+  // Scroll active tab into view
+  requestAnimationFrame(() => {
+    const active = container.querySelector('.month-tab.active');
+    if (active) active.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+  });
+}
+
+function selectMonth(yearStr, monthStr, pageKey) {
+  pageMonthState[pageKey] = { year: parseInt(yearStr), month: parseInt(monthStr) };
+  renderDetailPage(pageKey);
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+function init() {
+  applyTranslations();
+  const profiles = loadProfiles();
+  if (profiles.length === 0) { startOnboarding(); }
+  else { showPage('profiles'); renderProfileList(); }
+}
+
+// ══════════════════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════════════════
+function startOnboarding() {
+  obData = {name:'',avatar:'',currency:''};
+  document.getElementById('ob-name').value = '';
+  document.getElementById('ob-next-0').disabled = true;
+  document.querySelectorAll('#ob-avatar-grid .avatar-opt').forEach(e=>e.classList.remove('selected'));
+  document.querySelectorAll('#ob-currency-grid .currency-btn-ob').forEach(e=>e.classList.remove('active'));
+  obStep(0); showPage('onboarding');
+}
+function obStep(step) {
+  document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ob-step-'+step).classList.add('active');
+  for(let i=0;i<3;i++) document.getElementById('dot-'+i).classList.toggle('active',i<=step);
+}
+function obNext(step) {
+  if(step===1){ obData.name=document.getElementById('ob-name').value.trim(); if(!obData.name)return; }
+  if(step===2){ if(!obData.avatar)return; }
+  obStep(step);
+}
+function obSelectCurrency(btn) {
+  document.querySelectorAll('#ob-currency-grid .currency-btn-ob').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  obData.currency = btn.dataset.symbol;
+  document.getElementById('ob-next-2').disabled = false;
+}
+function selectAvatar(el) {
+  document.querySelectorAll('#ob-avatar-grid .avatar-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  obData.avatar = el.dataset.emoji;
+  document.getElementById('ob-next-1').disabled = false;
+}
+document.getElementById('ob-name').addEventListener('input', function() {
+  document.getElementById('ob-next-0').disabled = this.value.trim().length < 1;
+});
+function finishOnboarding() {
+  if(!obData.currency) return;
+  const profiles = loadProfiles();
+  const p = { id:'p_'+Date.now(), name:obData.name, avatar:obData.avatar, currency:obData.currency, transactions:[], nextId:1, recurringConfirmed:[] };
+  profiles.push(p);
+  saveProfiles(profiles);
+  setActiveId(p.id);
+  loadActiveProfile();
+  showPage('home');
+}
+
+// ══════════════════════════════════════════════════
+// PROFILES
+// ══════════════════════════════════════════════════
+function renderProfileList() {
+  const profiles = loadProfiles();
+  const el = document.getElementById('profile-list');
+  if (!profiles.length) { el.innerHTML=''; return; }
+  el.innerHTML = profiles.map(p=>{
+    const inc = (p.transactions||[]).filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const exp = (p.transactions||[]).filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const sav = (p.transactions||[]).filter(t=>t.type==='saving').reduce((s,t)=>s+t.amount,0);
+    const bal = inc-exp-sav;
+    const f   = n=>p.currency+Number(n).toLocaleString(L('locale')||'en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    return `<div class="profile-card" onclick="selectProfile('${p.id}')">
+      <div class="profile-avatar">${p.avatar||'👤'}</div>
+      <div class="profile-info">
+        <div class="profile-name">${escHtml(p.name)}</div>
+        <div class="profile-meta">${L('prof_balance')}: ${f(bal)} · ${(p.transactions||[]).length} ${L('prof_moves')}</div>
+      </div>
+      <svg class="profile-chevron" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:#3a5550"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </div>`;
+  }).join('');
+}
+function selectProfile(id) { setActiveId(id); loadActiveProfile(); showPage('home'); }
+
+// ══════════════════════════════════════════════════
+// LOAD ACTIVE PROFILE
+// ══════════════════════════════════════════════════
+function loadActiveProfile() {
+  const profiles = loadProfiles();
+  const profile  = profiles.find(p=>p.id===getActiveId());
+  if (!profile) { showPage('profiles'); return; }
+  currencySymbol = profile.currency||'$';
+  transactions   = profile.transactions||[];
+  nextId         = profile.nextId||(transactions.length+1);
+  confirmedRecurring = new Set(profile.recurringConfirmed||[]);
+  document.querySelectorAll('.currency-btn').forEach(b=>b.classList.toggle('active',b.dataset.symbol===currencySymbol));
+  const hour = new Date().getHours();
+  const greeting = hour<12?L('g_morning'):hour<19?L('g_afternoon'):L('g_evening');
+  document.getElementById('home-greeting').textContent = greeting;
+  // CORREGIDO: Mostrar nombre directamente sin prefijo
+  document.getElementById('home-welcome-name').textContent = profile.name;
+  document.getElementById('home-nav-avatar').textContent = profile.avatar||'👤';
+  document.getElementById('settings-avatar-icon').textContent = profile.avatar||'👤';
+  document.getElementById('settings-profile-name').textContent = profile.name;
+  document.getElementById('settings-profile-currency').textContent = L('s_currency_lbl')+currencySymbol;
+
+  // Reset month state to current real month
+  const today = new Date();
+  const curSel = { year: today.getFullYear(), month: today.getMonth()+1 };
+  pageMonthState.balance = { ...curSel };
+  pageMonthState.income  = { ...curSel };
+  pageMonthState.expense = { ...curSel };
+  pageMonthState.saving  = { ...curSel };
+
+  renderAll();
+}
+
+function persistTransactions() {
+  const profiles = loadProfiles();
+  const idx = profiles.findIndex(p=>p.id===getActiveId());
+  if (idx===-1) return;
+  profiles[idx].transactions = transactions;
+  profiles[idx].nextId = nextId;
+  profiles[idx].recurringConfirmed = [...confirmedRecurring];
+  saveProfiles(profiles);
+}
+
+// ══════════════════════════════════════════════════
+// EDIT PROFILE
+// ══════════════════════════════════════════════════
+function openEditProfile() {
+  const p = getActiveProfile(); if(!p) return;
+  document.getElementById('ep-name').value = p.name;
+  document.querySelectorAll('#ep-avatar-grid .avatar-opt').forEach(el=>el.classList.toggle('selected',el.dataset.emoji===p.avatar));
+  document.getElementById('edit-profile-modal').classList.add('open');
+}
+function closeEditModal(e) { if(e.target===document.getElementById('edit-profile-modal')) document.getElementById('edit-profile-modal').classList.remove('open'); }
+function epSelectAvatar(el) { document.querySelectorAll('#ep-avatar-grid .avatar-opt').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
+function saveEditProfile() {
+  const name = document.getElementById('ep-name').value.trim();
+  if(!name){ document.getElementById('ep-name').style.borderColor='var(--red)'; return; }
+  document.getElementById('ep-name').style.borderColor='';
+  const avatarEl = document.querySelector('#ep-avatar-grid .avatar-opt.selected');
+  const avatar   = avatarEl?avatarEl.dataset.emoji:getActiveProfile().avatar;
+  const profiles = loadProfiles();
+  const idx = profiles.findIndex(p=>p.id===getActiveId());
+  if(idx===-1) return;
+  profiles[idx].name=name; profiles[idx].avatar=avatar;
+  saveProfiles(profiles);
+  document.getElementById('edit-profile-modal').classList.remove('open');
+  loadActiveProfile();
+}
+function confirmDeleteProfile() {
+  const profiles = loadProfiles();
+  if(profiles.length<=1){ alert(L('alert_last')); return; }
+  if(!confirm(L('alert_del'))) return;
+  const remaining = profiles.filter(p=>p.id!==getActiveId());
+  saveProfiles(remaining); setActiveId(remaining[0].id);
+  showPage('profiles'); renderProfileList();
+}
+
+// ══════════════════════════════════════════════════
+// CATEGORY MANAGEMENT
+// ══════════════════════════════════════════════════
+function updateCategoryOptions() {
+  const typeSelect = document.getElementById('f-type');
+  const catSelect = document.getElementById('f-cat');
+  const recurringRow = document.getElementById('recurring-toggle-row');
+  
+  if (!typeSelect || !catSelect) return;
+  
+  const type = typeSelect.value;
+  
+  // Mostrar/ocultar toggle de recurrente (solo para gastos)
+  if (recurringRow) {
+    recurringRow.style.display = type === 'expense' ? 'flex' : 'none';
+  }
+  
+  // Actualizar opciones de categoría según el tipo
+  let categories = [];
+  if (type === 'income') {
+    categories = L('income_cats');
+  } else if (type === 'expense') {
+    categories = L('expense_cats');
+  } else if (type === 'saving') {
+    categories = L('saving_cats');
+  }
+  
+  catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// CORE HELPERS
+// ══════════════════════════════════════════════════
+function fmt(n) { return currencySymbol+Number(n).toLocaleString(L('locale')||'en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function getStats(txs = transactions) { return computeStats(txs); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildTxItem(t) {
+  const isCredit=t.type==='income', isSave=t.type==='saving';
+  const bg   = isCredit?'var(--green-light)':isSave?'var(--yellow-light)':'var(--red-light)';
+  const cls  = isCredit?'credit':isSave?'save':'debit';
+  const sign = isCredit?'+':isSave?'♥ ':'−';
+  const dateStr = new Date(t.date+'T12:00:00').toLocaleDateString(L('locale')||'en-US',{day:'2-digit',month:'short'});
+  const recBadge = t.recurring && t.type === 'expense' ? `<span class="tx-recurring-badge">🔁 ${L('lbl_recurring')||'Recurring'}</span>` : '';
+  return `<div class="tx-item" onclick="openEditTransactionModal(${t.id})">
+    ${recBadge}
+    <div class="tx-icon" style="background:${bg}">${catEmoji(t.cat)}</div>
+    <div class="tx-info">
+      <div class="tx-name">${escHtml(t.desc)}</div>
+      <div class="tx-cat">${catName(t.cat)}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="tx-amount ${cls}">${sign}${fmt(t.amount)}</div>
+      <div class="tx-date">${dateStr}</div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// EDIT TRANSACTION
+// ══════════════════════════════════════════════════
+function openEditTransactionModal(id) {
+  const tx = transactions.find(t => t.id === id);
+  if (!tx) return;
+  
+  document.getElementById('edit-transaction-id').value = tx.id;
+  document.getElementById('edit-desc').value = tx.desc;
+  document.getElementById('edit-amount').value = tx.amount;
+  document.getElementById('edit-date').value = tx.date;
+  
+  // Cargar categorías según tipo
+  let categories = [];
+  if (tx.type === 'income') categories = L('income_cats');
+  else if (tx.type === 'expense') categories = L('expense_cats');
+  else categories = L('saving_cats');
+  
+  const catSelect = document.getElementById('edit-cat');
+  catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  // Try to match by translated category or by original stored value
+  const translatedCat = translateCat(tx.cat);
+  catSelect.value = translatedCat || tx.cat;
+  
+  document.getElementById('edit-transaction-modal').classList.add('open');
+}
+
+function closeEditTransactionModal(e) {
+  if (e.target === document.getElementById('edit-transaction-modal')) {
+    document.getElementById('edit-transaction-modal').classList.remove('open');
+  }
+}
+
+function saveTransactionEdit() {
+  const id = parseInt(document.getElementById('edit-transaction-id').value);
+  const tx = transactions.find(t => t.id === id);
+  if (!tx) return;
+  
+  const desc = document.getElementById('edit-desc').value.trim();
+  const amount = parseFloat(document.getElementById('edit-amount').value);
+  const cat = document.getElementById('edit-cat').value;
+  const date = document.getElementById('edit-date').value;
+  
+  if (!desc || !amount || amount <= 0 || !date) return;
+  
+  tx.desc = desc;
+  tx.amount = amount;
+  tx.cat = cat;
+  tx.date = date;
+  
+  persistTransactions();
+  document.getElementById('edit-transaction-modal').classList.remove('open');
+  renderAll();
+}
+
+function deleteTransaction() {
+  if (!confirm(L('alert_delete_tx'))) return;
+  
+  const id = parseInt(document.getElementById('edit-transaction-id').value);
+  const index = transactions.findIndex(t => t.id === id);
+  if (index !== -1) {
+    transactions.splice(index, 1);
+    persistTransactions();
+  }
+  
+  document.getElementById('edit-transaction-modal').classList.remove('open');
+  renderAll();
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE 1: AI INSIGHTS
+// ══════════════════════════════════════════════════
+function generateInsights(stats) {
+  if (transactions.length < 2) return [];
+  const insights = [];
+  const expenses = transactions.filter(t=>t.type==='expense');
+  const { income, expense, saving } = stats;
+
+  const byCat = {};
+  expenses.forEach(t=>{
+    const cat = catName(t.cat);
+    byCat[cat] = (byCat[cat]||0) + t.amount;
+  });
+  const sortedCats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+
+  if (sortedCats.length > 0 && expense > 0) {
+    const [topCat, topAmt] = sortedCats[0];
+    const pct = Math.round((topAmt/expense)*100);
+    if (pct >= 25) {
+      insights.push({ icon:'🛒', color:'yellow', tag:L('ins_top'),
+        text: L('ins_t_top').replace('{CAT}',topCat).replace('{PCT}',pct).replace('{AMT}',fmt(topAmt)) });
+    }
+  }
+
+  if (income > 0) {
+    const saveRate = Math.round((saving/income)*100);
+    if (saveRate >= 20) {
+      insights.push({ icon:'🎯', color:'green', tag:L('ins_habit'),
+        text: L('ins_t_habit').replace('{PCT}',saveRate) });
+    } else if (saveRate > 0 && saveRate < 10) {
+      const ideal = Math.round(income * 0.2);
+      insights.push({ icon:'💡', color:'yellow', tag:L('ins_tip'),
+        text: L('ins_t_tip').replace('{PCT}',saveRate).replace('{IDEAL}',fmt(ideal)).replace('{YEAR}',fmt(ideal*12)) });
+    }
+  }
+
+  if (income > 0 && expense > 0) {
+    const ratio = expense/income;
+    if (ratio > 0.8) {
+      insights.push({ icon:'⚠️', color:'red', tag:L('ins_warn'),
+        text: L('ins_t_warn').replace('{PCT}',Math.round(ratio*100)) });
+    } else if (ratio < 0.5 && saving > 0) {
+      insights.push({ icon:'🚀', color:'green', tag:L('ins_excel'),
+        text: L('ins_t_excel').replace('{PCT}',Math.round(ratio*100)) });
+    }
+  }
+
+  if (sortedCats.length >= 3 && expense > 0) {
+    const [, second] = sortedCats[1] || [];
+    if (second) {
+      const secondPct = Math.round((second/expense)*100);
+      if (secondPct >= 15) {
+        insights.push({ icon:'📊', color:'purple', tag:L('ins_dist'),
+          text: L('ins_t_dist').replace('{PCT}',Math.round((sortedCats[0][1]+second)/expense*100)) });
+      }
+    }
+  }
+
+  return insights.slice(0, 3);
+}
+
+function renderInsights(stats) {
+  const insights = generateInsights(stats);
+  const section  = document.getElementById('insights-section');
+  const list     = document.getElementById('insights-list');
+  if (!insights.length) { section.style.display='none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = insights.map((ins,i)=>`
+    <div class="insight-card" style="animation-delay:${i*0.08}s">
+      <div class="insight-icon ${ins.color}">${ins.icon}</div>
+      <div class="insight-body">
+        <div class="insight-tag">${ins.tag}</div>
+        <div class="insight-text">${ins.text}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE 2: MONTH-END FORECAST (CORREGIDO)
+// ══════════════════════════════════════════════════
+function renderForecast(stats) {
+  const card = document.getElementById('forecast-card');
+  if (transactions.length < 3 || stats.income === 0) { card.style.display='none'; return; }
+  card.style.display = 'block';
+
+  const today       = new Date();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+  const dayOfMonth  = today.getDate();
+  const daysLeft    = daysInMonth - dayOfMonth;
+
+  // Usar gastos reales de este mes
+  const thisMonthTx = filterByMonth(transactions, { year: today.getFullYear(), month: today.getMonth()+1 });
+  const thisMonthStats = computeStats(thisMonthTx);
+  
+  // Calcular proyección suavizada para evitar picos irreales al inicio de mes
+  const smoothingDays  = Math.max(dayOfMonth, 7);
+  const dailyRate      = smoothingDays > 0 ? thisMonthStats.expense / smoothingDays : 0;
+  const projectedTotal = thisMonthStats.expense + (dailyRate * daysLeft);
+  const projectedBalance = stats.income - projectedTotal - stats.saving;
+
+  // Asegurar que el porcentaje sea válido
+  const maxIncome = Math.max(stats.income, 0.01); // Evitar división por cero
+  const ratio = Math.min(projectedTotal / maxIncome, 1);
+  const pct   = isNaN(ratio) ? 0 : Math.round(ratio * 100);
+
+  let status, msg;
+  if (projectedBalance > 0) {
+    status = 'ok';
+    msg = L('fc_ok').replace('{V}', fmt(Math.abs(projectedBalance)));
+  } else if (projectedBalance > -stats.income * 0.1) {
+    status = 'warn';
+    msg = L('fc_w').replace('{V}', fmt(Math.abs(projectedBalance)));
+  } else {
+    status = 'bad';
+    msg = L('fc_b').replace('{V}', fmt(Math.abs(projectedBalance)));
+  }
+
+  document.getElementById('forecast-badge').textContent = status==='ok'?L('fc_surplus'):status==='warn'?L('fc_warn'):L('fc_deficit');
+  document.getElementById('forecast-badge').className = `forecast-badge ${status}`;
+  document.getElementById('forecast-bar').style.width = pct+'%';
+  document.getElementById('forecast-bar').className = `forecast-bar ${status}`;
+  document.getElementById('forecast-spent-label').textContent = L('fc_spent')+fmt(thisMonthStats.expense);
+  document.getElementById('forecast-income-label').textContent = L('fc_inc')+fmt(stats.income);
+  document.getElementById('forecast-msg').innerHTML = msg;
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE 3: RECURRING DETECTION
+// ══════════════════════════════════════════════════
+function detectRecurring() {
+  const expenseGroups = {};
+  transactions.filter(t=>t.type==='expense').forEach(t=>{
+    const key = t.desc.toLowerCase().trim();
+    if (!expenseGroups[key]) expenseGroups[key] = [];
+    expenseGroups[key].push(t);
+  });
+  const candidates = Object.entries(expenseGroups)
+    .filter(([key, txs]) => txs.length >= 2 && !confirmedRecurring.has(key))
+    .map(([key, txs]) => {
+      const avgAmt = txs.reduce((s,t)=>s+t.amount,0)/txs.length;
+      return { key, desc:txs[0].desc, cat:txs[0].cat, avgAmt, count:txs.length };
+    });
+  return candidates;
+}
+
+function renderRecurringBanner() {
+  const candidates = detectRecurring();
+  const banner     = document.getElementById('recurring-banner');
+  if (!candidates.length) { banner.style.display='none'; return; }
+  banner.style.display = 'flex';
+  const names = candidates.slice(0,2).map(c=>c.desc).join(', ');
+  const more  = candidates.length > 2 ? ` +${candidates.length-2}` : '';
+  document.getElementById('recurring-banner-sub').textContent = names + more;
+}
+
+function openRecurringModal() {
+  const candidates = detectRecurring();
+  const list = document.getElementById('recurring-modal-list');
+  if (!candidates.length) { return; }
+  list.innerHTML = candidates.map(c=>`
+    <div class="rec-item">
+      <div style="font-size:1.2rem">${c.cat.split(' ')[0]}</div>
+      <div class="rec-info">
+        <div class="rec-name">${escHtml(c.desc)}</div>
+        <div class="rec-amount">~${fmt(c.avgAmt)} · ${c.count}× ${L('rec_detected')}</div>
+      </div>
+      <button class="rec-confirm-btn" id="rec-btn-${btoa(c.key).replace(/=/g,'')}" onclick="confirmRecurring('${escHtml(c.key)}', this)">${L('rec_confirm')}</button>
+    </div>`).join('');
+  document.getElementById('recurring-modal').classList.add('open');
+}
+function confirmRecurring(key, btn) {
+  confirmedRecurring.add(key);
+  transactions.forEach(t => { if(t.desc.toLowerCase().trim()===key) t.recurring=true; });
+  persistTransactions();
+  btn.textContent = L('rec_confirmed');
+  btn.classList.add('confirmed');
+  renderRecurringBanner();
+}
+function closeRecurringModal(e)  { if(e.target===document.getElementById('recurring-modal')) document.getElementById('recurring-modal').classList.remove('open'); }
+function closeRecurringModalDirect() { document.getElementById('recurring-modal').classList.remove('open'); }
+
+// ══════════════════════════════════════════════════
+// FEATURE 4: WEEKLY CHALLENGE
+// ══════════════════════════════════════════════════
+function getChallengeData() {
+  const stored = localStorage.getItem(SK_CHALLENGE);
+  if (stored) {
+    try {
+      const data = JSON.parse(stored);
+      if (data.profileId === getActiveId() && data.weekKey === getWeekKey()) return data;
+    } catch {}
+  }
+  return generateChallenge();
+}
+function getWeekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil(((d-jan1)/86400000 + jan1.getDay()+1)/7);
+  return `${d.getFullYear()}-W${week}`;
+}
+function generateChallenge() {
+  const challenges = L('challenges') || I18N['en'].challenges;
+  const pick = challenges[Math.floor(Math.random()*challenges.length)];
+  const data = {
+    profileId: getActiveId(),
+    weekKey:   getWeekKey(),
+    type:      pick.type,
+    target:    pick.target,
+    cat:       pick.cat,
+    startDate: new Date().toISOString().split('T')[0]
+  };
+  localStorage.setItem(SK_CHALLENGE, JSON.stringify(data));
+  return data;
+}
+
+function getChallengeDefinition(type) {
+  const curList = L('challenges') || [];
+  const inCurrent = curList.find(ch => ch.type === type);
+  if (inCurrent) return inCurrent;
+  const enList = I18N['en'].challenges || [];
+  return enList.find(ch => ch.type === type) || null;
+}
+
+function matchesChallengeCategory(tx, challengeType) {
+  const n = catName(tx.cat).toLowerCase();
+  if (challengeType === 'ocio') return /(ocio|entretenimiento|leisure)/.test(n);
+  if (challengeType === 'rest') return /(restaurantes|restaurant)/.test(n);
+  if (challengeType === 'transport') return /(transporte|transport|gasolina)/.test(n);
+  return false;
+}
+
+function getChallengeProgress(challenge) {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0,0,0,0);
+  const weekTx = transactions.filter(t => new Date(t.date+'T12:00:00') >= startOfWeek);
+  if (challenge.type === 'save') {
+    const saved = weekTx.filter(t=>t.type==='saving').reduce((s,t)=>s+t.amount,0);
+    return { current: saved, target: challenge.target, inverted: false };
+  }
+  if (challenge.type === 'noexpense') {
+    const days = new Set(weekTx.filter(t=>t.type==='expense').map(t=>t.date)).size;
+    const cleanDays = now.getDay() - days;
+    return { current: cleanDays, target: 1, inverted: false, unit: L('ch_unit') };
+  }
+  if (challenge.cat) {
+    const spent = weekTx.filter(t => t.type === 'expense' && matchesChallengeCategory(t, challenge.type)).reduce((s,t)=>s+t.amount,0);
+    return { current: spent, target: challenge.target, inverted: true };
+  }
+  return { current:0, target:challenge.target, inverted:false };
+}
+function renderChallenge() {
+  const card = document.getElementById('challenge-card');
+  if (transactions.length < 1) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  const ch   = getChallengeData();
+  const prog = getChallengeProgress(ch);
+  const now  = new Date();
+  const daysLeft = 7 - now.getDay();
+  const challengeDef = getChallengeDefinition(ch.type);
+  const challengeDesc = challengeDef?.desc || '';
+  document.getElementById('challenge-desc').textContent = challengeDesc.replace('{T}', fmt(ch.target));
+  document.getElementById('challenge-days-left').textContent = daysLeft + L('ch_days');
+  let pct, completed, statusText;
+  if (prog.inverted) {
+    pct = Math.max(0, Math.min(100, Math.round((1 - prog.current/prog.target)*100)));
+    completed = prog.current <= prog.target;
+    statusText = `${fmt(prog.current)} / ${fmt(prog.target)}`;
+  } else {
+    pct = Math.min(100, Math.round((prog.current/prog.target)*100));
+    completed = prog.current >= prog.target;
+    statusText = prog.unit ? `${prog.current} ${L('ch_unit')}` : `${fmt(prog.current)} / ${fmt(prog.target)}`;
+  }
+  const body = document.getElementById('challenge-body');
+  if (completed) {
+    body.innerHTML = `<div class="challenge-completed"><span class="trophy">🏆</span><p>${L('ch_done')}</p></div>`;
+  } else {
+    body.innerHTML = `
+      <div class="challenge-progress-wrap"><div class="challenge-progress-bar" style="width:${pct}%"></div></div>
+      <div class="challenge-footer">
+        <span class="challenge-pct">${pct}%</span>
+        <span class="challenge-status">${statusText}</span>
+      </div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE 5: PDF EXPORT
+// ══════════════════════════════════════════════════
+function exportPDF() {
+  const profile = getActiveProfile();
+  const thisMonthTx = getCurrentMonthTransactions();
+  const stats   = getStats(thisMonthTx);
+  const now     = new Date();
+  const monthName = now.toLocaleDateString(L('locale')||'en-US',{month:'long',year:'numeric'});
+  const sorted  = [...thisMonthTx].sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const rows = sorted.map(t=>{
+    const sign = t.type==='income'?'+':t.type==='saving'?'♥':'−';
+    const color = t.type==='income'?'#1fa882':t.type==='saving'?'#d9890a':'#e03040';
+    const dateStr = new Date(t.date+'T12:00:00').toLocaleDateString(L('locale')||'en-US',{day:'2-digit',month:'short'});
+    return `<tr>
+      <td>${escHtml(t.desc)}</td>
+      <td>${t.cat.replace(/^\S+\s/,'')}</td>
+      <td>${dateStr}</td>
+      <td style="font-weight:700;color:${color};text-align:right">${sign}${fmt(t.amount)}</td>
+    </tr>`;
+  }).join('');
+
+  const genDate = new Date().toLocaleDateString(L('locale')||'en-US',{day:'2-digit',month:'long',year:'numeric'});
+  const html = `<!DOCTYPE html><html><head>
+  <meta charset="UTF-8">
+  <title>Savelo – ${monthName}</title>
+  <style>
+    body { font-family:'Segoe UI',Arial,sans-serif; color:#0f1c1a; padding:40px; max-width:700px; margin:0 auto; }
+    h1 { font-size:1.8rem; font-weight:800; color:#1fa882; margin:0 0 4px; }
+    .sub { color:#7a9490; font-size:.9rem; margin-bottom:32px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+    .stat { background:#f0f4f2; border-radius:12px; padding:16px; }
+    .stat-l { font-size:.7rem; font-weight:700; color:#7a9490; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+    .stat-v { font-size:1.3rem; font-weight:700; font-family:Arial; }
+    .stat-v.b { color:#6C63FF; } .stat-v.i { color:#1fa882; } .stat-v.e { color:#e03040; } .stat-v.s { color:#d9890a; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    th { text-align:left; padding:10px 8px; border-bottom:2px solid #dde8e5; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:#7a9490; }
+    td { padding:10px 8px; border-bottom:1px solid #f0f4f2; }
+    tr:last-child td { border-bottom:none; }
+    .footer { margin-top:32px; text-align:center; font-size:.75rem; color:#7a9490; }
+  </style></head><body>
+  <h1>Savelo</h1>
+  <div class="sub">${L('pdf_sub').replace('{M}',monthName).replace('{N}',escHtml(profile.name))}</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">${L('lbl_balance')}</div><div class="stat-v b">${fmt(stats.balance)}</div></div>
+    <div class="stat"><div class="stat-l">${L('lbl_income')}</div><div class="stat-v i">${fmt(stats.income)}</div></div>
+    <div class="stat"><div class="stat-l">${L('lbl_expense')}</div><div class="stat-v e">${fmt(stats.expense)}</div></div>
+    <div class="stat"><div class="stat-l">${L('lbl_saving')}</div><div class="stat-v s">${fmt(stats.saving)}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>${L('pdf_desc')}</th><th>${L('pdf_cat')}</th><th>${L('pdf_date')}</th><th style="text-align:right">${L('pdf_amt')}</th></tr></thead>
+    <tbody>${rows||`<tr><td colspan="4" style="text-align:center;color:#7a9490;padding:24px">${L('pdf_empty')}</td></tr>`}</tbody>
+  </table>
+  <div class="footer">${L('pdf_gen').replace('{D}',genDate)}</div>
+  </body></html>`;
+
+  const win = window.open('','_blank');
+  if (!win) { alert(L('popup_alert')); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 400);
+}
+
+// ══════════════════════════════════════════════════
+// RENDER DETAIL PAGES (with month filter)
+// ══════════════════════════════════════════════════
+function renderDetailPage(pageKey) {
+  const sel = pageMonthState[pageKey];
+  const filtered = filterByMonth(transactions, sel);
+  const s = computeStats(filtered);
+  const empty = filtered.length === 0;
+  const d = v => empty ? fmt(0) : fmt(v);
+
+  const MN = getMonthNames();
+  const monthLabel = sel
+    ? MN[sel.month-1] + ' ' + sel.year
+    : L('d_all_months');
+
+  if (pageKey === 'balance') {
+    document.getElementById('d-balance-total').textContent = fmt(s.balance);
+    document.getElementById('d-balance-month-label').textContent = monthLabel;
+    buildMonthTabs('balance-month-tabs', 'balance');
+    const sorted = [...filtered].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    document.getElementById('balance-tx-list').innerHTML = sorted.map(buildTxItem).join('') || emptyState();
+  }
+
+  if (pageKey === 'income') {
+    document.getElementById('d-income-total').textContent = fmt(s.income);
+    document.getElementById('d-income-sub').textContent = L('d_in_month').replace('{AMT}',fmt(s.income)).replace('{M}',monthLabel);
+    buildMonthTabs('income-month-tabs', 'income');
+    const sorted = [...filtered].filter(t=>t.type==='income').sort((a,b)=>new Date(b.date)-new Date(a.date));
+    document.getElementById('income-tx-list').innerHTML = sorted.map(buildTxItem).join('') || emptyState();
+  }
+
+  if (pageKey === 'expense') {
+    document.getElementById('d-expense-total').textContent = fmt(s.expense);
+    document.getElementById('d-expense-sub').textContent = L('d_spent_month').replace('{AMT}',fmt(s.expense)).replace('{M}',monthLabel);
+    buildMonthTabs('expense-month-tabs', 'expense');
+    const sorted = [...filtered].filter(t=>t.type==='expense').sort((a,b)=>new Date(b.date)-new Date(a.date));
+    document.getElementById('expense-tx-list').innerHTML = sorted.map(buildTxItem).join('') || emptyState();
+  }
+
+  if (pageKey === 'saving') {
+    document.getElementById('d-saving-total').textContent = fmt(s.saving);
+    const sgCard = document.getElementById('saving-goal-card');
+    if (s.saving > 0) {
+      sgCard.style.display = 'block';
+      const goal = s.income * 0.2 || 500;
+      const pct  = Math.min(100, Math.round((s.saving/goal)*100));
+      document.getElementById('saving-goal-label').textContent = `${fmt(s.saving)} / ${fmt(goal)}`;
+      document.getElementById('saving-goal-bar').style.width = pct+'%';
+      const goalMsg = pct>=100 ? L('d_goal_done') : pct>=75 ? `${pct}${L('d_goal_great')}` : `${pct}${L('d_goal_pct')}`;
+      document.getElementById('saving-goal-msg').textContent = goalMsg;
+    } else { sgCard.style.display='none'; }
+    document.getElementById('d-saving-sub').textContent = s.saving > 0
+      ? L('d_saving_yes').replace('{AMT}',fmt(s.saving)).replace('{M}',monthLabel)
+      : L('d_saving_no').replace('{M}',monthLabel);
+    buildMonthTabs('saving-month-tabs', 'saving');
+    const sorted = [...filtered].filter(t=>t.type==='saving').sort((a,b)=>new Date(b.date)-new Date(a.date));
+    document.getElementById('saving-tx-list').innerHTML = sorted.map(buildTxItem).join('') || emptyState();
+  }
+}
+
+// ══════════════════════════════════════════════════
+// RENDER ALL (home page always shows global totals)
+// ══════════════════════════════════════════════════
+function renderAll() {
+  // Home page: show current month totals
+  const thisMonthTx = getCurrentMonthTransactions();
+  const s     = getStats(thisMonthTx);
+  const empty = thisMonthTx.length === 0;
+
+  document.getElementById('h-balance').textContent  = empty ? '—' : fmt(s.balance);
+  document.getElementById('h-income').textContent   = empty ? '—' : fmt(s.income);
+  document.getElementById('h-expense').textContent  = empty ? '—' : fmt(s.expense);
+  document.getElementById('h-saving').textContent   = empty ? '—' : fmt(s.saving);
+
+  document.querySelectorAll('.stat-delta').forEach(el=>el.style.visibility=empty?'hidden':'visible');
+
+  const chip = document.getElementById('home-insight-chip');
+  if (!empty && s.saving > 0 && s.income > 0) {
+    const rate = Math.round((s.saving/s.income)*100);
+    document.getElementById('saving-pct-chip').textContent = ` ${rate}% `;
+    chip.style.display = 'inline-flex';
+  } else { chip.style.display='none'; }
+
+  // Home TX list: last 5 recent
+  const sorted = [...transactions].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('home-tx-list').innerHTML = sorted.slice(0,5).map(buildTxItem).join('') || emptyStateFirst();
+
+  // Smart features
+  renderForecast(s);
+  renderInsights(s);
+  renderRecurringBanner();
+  renderChallenge();
+
+  // Re-render whichever detail page is currently active
+  ['balance','income','expense','saving'].forEach(key => {
+    if (document.getElementById('page-'+key).classList.contains('active')) {
+      renderDetailPage(key);
+    }
+  });
+}
+
+function emptyState() {
+  return `<div class="empty"><div class="empty-icon">📭</div><p>${L('empty_month')}</p></div>`;
+}
+function emptyStateFirst() {
+  return `<div class="empty" style="padding:32px 20px">
+    <div class="empty-icon">🚀</div>
+    <p style="font-weight:700;font-size:.92rem;color:var(--text);margin-bottom:6px">${L('empty_start')}</p>
+    <p style="font-size:.82rem">${L('empty_start_sub')}</p>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  if (name==='profiles') renderProfileList();
+  // Render detail pages on navigation
+  if (['balance','income','expense','saving'].includes(name)) {
+    renderDetailPage(name);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════
+function openModal(type) {
+  const titles = { general:L('m_general'), income:L('m_income'), expense:L('m_expense'), saving:L('m_saving') };
+  document.getElementById('modal-title').textContent = titles[type]||titles.general;
+  document.getElementById('f-edit-id').value = '';
+  if(type!=='general') {
+    document.getElementById('f-type').value=type;
+  } else {
+    document.getElementById('f-type').value='income';
+  }
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('f-recurring').checked = false;
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-amount').value = '';
+  
+  // Actualizar categorías según tipo seleccionado
+  updateCategoryOptions();
+  
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) { if(e.target===document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); }
+function toggleRecurring() {
+  const cb = document.getElementById('f-recurring');
+  cb.checked = !cb.checked;
+}
+function addTransaction() {
+  const editId = document.getElementById('f-edit-id').value;
+  const desc   = document.getElementById('f-desc').value.trim();
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const type   = document.getElementById('f-type').value;
+  const cat    = document.getElementById('f-cat').value;
+  const date   = document.getElementById('f-date').value;
+  const recur  = document.getElementById('f-recurring').checked;
+
+  document.getElementById('f-desc').style.borderColor   = desc?'':'var(--red)';
+  document.getElementById('f-amount').style.borderColor = amount>0?'':'var(--red)';
+  if(!desc||!amount||amount<=0||!date) return;
+
+  if (editId) {
+    // Editar transacción existente
+    const tx = transactions.find(t => t.id === parseInt(editId));
+    if (tx) {
+      tx.desc = desc;
+      tx.amount = amount;
+      tx.type = type;
+      tx.cat = cat;
+      tx.date = date;
+      tx.recurring = recur;
+    }
+  } else {
+    // Nueva transacción
+    transactions.push({ id:nextId++, desc, cat, type, amount, date, recurring: recur||false });
+    if (recur) confirmedRecurring.add(desc.toLowerCase().trim());
+  }
+  
+  persistTransactions();
+
+  renderAll();
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-amount').value='';
+  document.getElementById('f-desc').style.borderColor='';
+  document.getElementById('f-amount').style.borderColor='';
+}
+
+// ══════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.getElementById('dark-toggle').checked;
+  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
+  document.getElementById('theme-sub').textContent = isDark ? L('s_dark_on') : L('s_dark_off');
+}
+function setCurrency(btn) {
+  document.querySelectorAll('.currency-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currencySymbol = btn.dataset.symbol;
+  const profiles = loadProfiles();
+  const idx = profiles.findIndex(p=>p.id===getActiveId());
+  if(idx!==-1){ profiles[idx].currency=currencySymbol; saveProfiles(profiles); }
+  document.getElementById('settings-profile-currency').textContent = L('s_currency_lbl')+currencySymbol;
+  renderAll();
+}
+
+// ══════════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
