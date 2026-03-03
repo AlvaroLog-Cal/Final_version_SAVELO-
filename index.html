@@ -115,21 +115,26 @@
   .card-expense .stat-value { color:var(--red); }
   .card-saving  .stat-value { color:var(--yellow); }
 
-  /* ── FORECAST CARD ── */
-  .forecast-card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:22px; box-shadow:var(--shadow); border:1.5px solid var(--border); }
-  .forecast-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .forecast-title { font-size:.88rem; font-weight:700; display:flex; align-items:center; gap:7px; }
-  .forecast-badge { font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:20px; }
-  .forecast-badge.ok   { background:var(--green-light); color:var(--teal); }
-  .forecast-badge.warn { background:var(--yellow-light); color:#c47d00; }
-  .forecast-badge.bad  { background:var(--red-light); color:var(--red); }
-  .forecast-bar-wrap { height:8px; background:var(--border); border-radius:8px; overflow:hidden; margin-bottom:10px; }
-  .forecast-bar { height:100%; border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1); }
-  .forecast-bar.ok   { background:linear-gradient(90deg,var(--teal),var(--teal-dark)); }
-  .forecast-bar.warn { background:linear-gradient(90deg,#f5a623,#d9890a); }
-  .forecast-bar.bad  { background:linear-gradient(90deg,#ff5a5f,#e03040); }
-  .forecast-legend { display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); }
-  .forecast-msg { font-size:.8rem; color:var(--text); margin-top:10px; line-height:1.5; padding-top:10px; border-top:1px solid var(--border); }
+  /* ── EXPENSE COMPARISON CARD ── */
+  .compare-card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:22px; box-shadow:var(--shadow); border:1.5px solid var(--border); }
+  .compare-title { font-size:.88rem; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:7px; }
+  .compare-amount { font-size:1.45rem; font-weight:800; letter-spacing:-.02em; margin-bottom:4px; }
+  .compare-amount.up { color:var(--red); }
+  .compare-amount.down { color:var(--teal); }
+  .compare-amount.same { color:var(--muted); }
+  .compare-msg { font-size:.8rem; color:var(--muted); line-height:1.45; }
+
+  /* ── EXPENSE BREAKDOWN ── */
+  .breakdown-card { background:var(--card); border-radius:var(--radius); padding:16px; margin:14px 0 18px; box-shadow:var(--shadow); border:1px solid var(--border); }
+  .breakdown-title { font-size:.85rem; font-weight:700; margin-bottom:12px; }
+  .breakdown-item { margin-bottom:11px; }
+  .breakdown-item:last-child { margin-bottom:0; }
+  .breakdown-row { display:flex; justify-content:space-between; align-items:center; font-size:.78rem; margin-bottom:5px; }
+  .breakdown-cat { font-weight:600; }
+  .breakdown-meta { color:var(--muted); }
+  .breakdown-track { height:8px; border-radius:8px; background:var(--border); overflow:hidden; }
+  .breakdown-fill { height:100%; border-radius:8px; background:linear-gradient(90deg,var(--red),#ff7e80); }
+  .breakdown-empty { font-size:.8rem; color:var(--muted); }
 
   /* ── AI INSIGHTS ── */
   .insights-section { margin-bottom:22px; }
@@ -402,18 +407,11 @@
       </div>
     </div>
 
-    <!-- FORECAST -->
-    <div class="forecast-card" id="forecast-card" style="display:none">
-      <div class="forecast-header">
-        <span class="forecast-title" id="forecast-title-lbl">📅 Previsión de fin de mes</span>
-        <span class="forecast-badge" id="forecast-badge">—</span>
-      </div>
-      <div class="forecast-bar-wrap"><div class="forecast-bar" id="forecast-bar" style="width:0%"></div></div>
-      <div class="forecast-legend">
-        <span id="forecast-spent-label">Gastado</span>
-        <span id="forecast-income-label">Ingresado</span>
-      </div>
-      <div class="forecast-msg" id="forecast-msg"></div>
+    <!-- EXPENSE COMPARISON -->
+    <div class="compare-card" id="expense-compare-card" style="display:none">
+      <div class="compare-title" id="compare-title-lbl">📊 Comparativa de gastos</div>
+      <div class="compare-amount" id="compare-amount">—</div>
+      <div class="compare-msg" id="compare-msg"></div>
     </div>
 
     <!-- AI INSIGHTS -->
@@ -506,6 +504,10 @@
     </div>
     <button class="btn-add" id="expense-add-btn" onclick="openModal('expense')"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="17" height="17"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Añadir Gasto</button>
     <div class="month-tabs" id="expense-month-tabs"></div>
+    <div class="breakdown-card" id="expense-breakdown-card" style="display:none">
+      <div class="breakdown-title" id="expense-breakdown-title">Desglose por categoría</div>
+      <div id="expense-breakdown-list"></div>
+    </div>
     <div class="section-header"><span class="section-title" id="expense-history-title">Historial de gastos</span></div>
     <div class="tx-list" id="expense-tx-list"></div>
   </div>
@@ -777,16 +779,16 @@ const I18N = {
     btn_add_tx:'Añadir Transacción', lbl_balance:'Balance', lbl_income:'Ingresos', lbl_expense:'Gastos', lbl_saving:'Ahorro',
     recent:'Movimientos recientes', see_all:'Ver todos →',
     chip:'✨ Has ahorrado', chip2:'más que el mes pasado',
-    // Forecast - CORREGIDO
-    fc_title:'📅 Previsión de fin de mes', 
-    fc_surplus:'✓ Superávit proyectado', 
-    fc_warn:'⚠ Límite ajustado', 
-    fc_deficit:'✗ Déficit proyectado',
-    fc_spent:'Gastado: ', 
-    fc_inc:'Ingresos: ',
-    fc_ok:'Si mantienes el ritmo actual, terminarás el mes con <strong>{V}</strong> de superávit. ¡Buen control!',
-    fc_w:'Estás cerca del límite. Se proyecta un déficit de <strong>{V}</strong> a fin de mes. Reduce algún gasto esta semana.',
-    fc_b:'Atención: el ritmo actual apunta a un déficit de <strong>{V}</strong>. Revisa tus gastos de ocio y restaurantes.',
+    cmp_title:'📊 Comparativa de gastos',
+    cmp_up:'+{PCT}% vs mes pasado',
+    cmp_down:'-{PCT}% vs mes pasado',
+    cmp_same:'0% vs mes pasado',
+    cmp_msg_up:'Has gastado <strong>{CUR}</strong> más que en {M}.',
+    cmp_msg_down:'Has gastado <strong>{CUR}</strong> menos que en {M}. ¡Buen progreso!',
+    cmp_msg_same:'Tus gastos están igual que en {M}.',
+    cmp_no_prev:'No hay datos de gastos del mes pasado para comparar.',
+    exp_breakdown_title:'Desglose por categoría',
+    exp_breakdown_empty:'No hay gastos en este mes para desglosar.',
     // Insights
     ins_title:'🧠 Tu asesor financiero',
     ins_top:'Gasto principal', ins_habit:'Gran hábito', ins_tip:'Consejo', ins_warn:'Atención', ins_excel:'Excelente control', ins_dist:'Distribución',
@@ -864,11 +866,16 @@ const I18N = {
     btn_add_tx:'Add Transaction', lbl_balance:'Balance', lbl_income:'Income', lbl_expense:'Expenses', lbl_saving:'Savings',
     recent:'Recent transactions', see_all:'See all →',
     chip:'✨ You saved', chip2:'more than last month',
-    fc_title:'📅 Month-end forecast', fc_surplus:'✓ Projected surplus', fc_warn:'⚠ Near limit', fc_deficit:'✗ Projected deficit',
-    fc_spent:'Spent: ', fc_inc:'Income: ',
-    fc_ok:'At your current pace, you will end the month with a surplus of <strong>{V}</strong>. Great control!',
-    fc_w:"You're near the limit. A deficit of <strong>{V}</strong> is projected by month end. Cut some spending this week.",
-    fc_b:'Warning: at your current rate a deficit of <strong>{V}</strong> is projected. Review leisure and dining expenses.',
+    cmp_title:'📊 Expense comparison',
+    cmp_up:'+{PCT}% vs last month',
+    cmp_down:'-{PCT}% vs last month',
+    cmp_same:'0% vs last month',
+    cmp_msg_up:'You spent <strong>{CUR}</strong> more than in {M}.',
+    cmp_msg_down:'You spent <strong>{CUR}</strong> less than in {M}. Great progress!',
+    cmp_msg_same:'Your expenses are the same as in {M}.',
+    cmp_no_prev:'No expense data from last month to compare yet.',
+    exp_breakdown_title:'Category breakdown',
+    exp_breakdown_empty:'No expenses this month to break down.',
     ins_title:'🧠 Your financial advisor',
     ins_top:'Top expense', ins_habit:'Great habit', ins_tip:'Tip', ins_warn:'Warning', ins_excel:'Excellent control', ins_dist:'Distribution',
     ins_t_top:'Your top spending category is <strong>{CAT}</strong>, representing <strong>{PCT}%</strong> of all your expenses this month ({AMT}).',
@@ -923,6 +930,76 @@ const I18N = {
   // ... pt, fr, de, it mantienen la misma estructura
 };
 
+// Ensure full dictionaries exist for all supported languages.
+// Start from English and override with localized strings.
+I18N.pt = {
+  ...I18N.en,
+  nav_settings:'Configurações', nav_balance:'Saldo', nav_income:'Receitas', nav_expense:'Despesas', nav_saving:'Poupança',
+  g_morning:'Bom dia 👋', g_afternoon:'Boa tarde 👋', g_evening:'Boa noite 👋',
+  btn_add_tx:'Adicionar transação', lbl_income:'Receitas', lbl_expense:'Despesas', lbl_saving:'Poupança',
+  recent:'Movimentos recentes', see_all:'Ver todos →',
+  cmp_title:'📊 Comparação de despesas', cmp_up:'+{PCT}% vs mês passado', cmp_down:'-{PCT}% vs mês passado', cmp_same:'0% vs mês passado',
+  cmp_msg_up:'Você gastou <strong>{CUR}</strong> a mais que em {M}.', cmp_msg_down:'Você gastou <strong>{CUR}</strong> a menos que em {M}. Ótimo progresso!',
+  cmp_msg_same:'Suas despesas estão iguais a {M}.', cmp_no_prev:'Ainda não há dados do mês anterior para comparar.',
+  exp_breakdown_title:'Desagregação por categoria', exp_breakdown_empty:'Não há despesas neste mês para detalhar.',
+  d_income_month:'Receitas do mês', d_add_income:'Adicionar receita', d_income_hist:'Histórico de receitas',
+  d_expense_month:'Despesas do mês', d_add_expense:'Adicionar despesa', d_expense_hist:'Histórico de despesas',
+  d_saving_month:'Poupança do mês', d_add_saving:'Adicionar poupança', d_saving_hist:'Histórico de poupança',
+  s_lang:'Idioma', s_lang_sub:'Selecione o idioma do app.',
+  months:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'], locale:'pt-BR', prof_moves:'movimentos'
+};
+
+I18N.fr = {
+  ...I18N.en,
+  nav_back:'Retour', nav_settings:'Paramètres', nav_balance:'Solde', nav_income:'Revenus', nav_expense:'Dépenses', nav_saving:'Épargne',
+  g_morning:'Bonjour 👋', g_afternoon:'Bon après-midi 👋', g_evening:'Bonsoir 👋',
+  btn_add_tx:'Ajouter une transaction', lbl_income:'Revenus', lbl_expense:'Dépenses', lbl_saving:'Épargne',
+  recent:'Transactions récentes', see_all:'Voir tout →',
+  cmp_title:'📊 Comparaison des dépenses', cmp_up:'+{PCT}% vs mois dernier', cmp_down:'-{PCT}% vs mois dernier', cmp_same:'0% vs mois dernier',
+  cmp_msg_up:'Vous avez dépensé <strong>{CUR}</strong> de plus qu’en {M}.', cmp_msg_down:'Vous avez dépensé <strong>{CUR}</strong> de moins qu’en {M}. Bon progrès !',
+  cmp_msg_same:'Vos dépenses sont identiques à {M}.', cmp_no_prev:'Pas encore de données du mois dernier pour comparer.',
+  exp_breakdown_title:'Répartition par catégorie', exp_breakdown_empty:'Aucune dépense ce mois-ci à répartir.',
+  d_income_month:'Revenus du mois', d_add_income:'Ajouter un revenu', d_income_hist:'Historique des revenus',
+  d_expense_month:'Dépenses du mois', d_add_expense:'Ajouter une dépense', d_expense_hist:'Historique des dépenses',
+  d_saving_month:'Épargne du mois', d_add_saving:'Ajouter une épargne', d_saving_hist:'Historique de l’épargne',
+  s_lang:'Langue', s_lang_sub:'Sélectionnez la langue de l’application.',
+  months:['Janv','Févr','Mars','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'], locale:'fr-FR', prof_moves:'transactions'
+};
+
+I18N.de = {
+  ...I18N.en,
+  nav_back:'Zurück', nav_settings:'Einstellungen', nav_balance:'Kontostand', nav_income:'Einnahmen', nav_expense:'Ausgaben', nav_saving:'Sparen',
+  g_morning:'Guten Morgen 👋', g_afternoon:'Guten Tag 👋', g_evening:'Guten Abend 👋',
+  btn_add_tx:'Transaktion hinzufügen', lbl_income:'Einnahmen', lbl_expense:'Ausgaben', lbl_saving:'Sparen',
+  recent:'Letzte Transaktionen', see_all:'Alle anzeigen →',
+  cmp_title:'📊 Ausgabenvergleich', cmp_up:'+{PCT}% vs letzter Monat', cmp_down:'-{PCT}% vs letzter Monat', cmp_same:'0% vs letzter Monat',
+  cmp_msg_up:'Du hast <strong>{CUR}</strong> mehr ausgegeben als in {M}.', cmp_msg_down:'Du hast <strong>{CUR}</strong> weniger ausgegeben als in {M}. Gute Entwicklung!',
+  cmp_msg_same:'Deine Ausgaben sind wie in {M}.', cmp_no_prev:'Noch keine Daten vom letzten Monat zum Vergleichen.',
+  exp_breakdown_title:'Aufschlüsselung nach Kategorie', exp_breakdown_empty:'Keine Ausgaben in diesem Monat zum Aufschlüsseln.',
+  d_income_month:'Einnahmen des Monats', d_add_income:'Einnahme hinzufügen', d_income_hist:'Einnahmeverlauf',
+  d_expense_month:'Ausgaben des Monats', d_add_expense:'Ausgabe hinzufügen', d_expense_hist:'Ausgabenverlauf',
+  d_saving_month:'Ersparnisse des Monats', d_add_saving:'Ersparnis hinzufügen', d_saving_hist:'Sparverlauf',
+  s_lang:'Sprache', s_lang_sub:'Wähle die App-Sprache aus.',
+  months:['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'], locale:'de-DE', prof_moves:'Transaktionen'
+};
+
+I18N.it = {
+  ...I18N.en,
+  nav_back:'Indietro', nav_settings:'Impostazioni', nav_balance:'Saldo', nav_income:'Entrate', nav_expense:'Spese', nav_saving:'Risparmio',
+  g_morning:'Buongiorno 👋', g_afternoon:'Buon pomeriggio 👋', g_evening:'Buonasera 👋',
+  btn_add_tx:'Aggiungi transazione', lbl_income:'Entrate', lbl_expense:'Spese', lbl_saving:'Risparmio',
+  recent:'Movimenti recenti', see_all:'Vedi tutto →',
+  cmp_title:'📊 Confronto spese', cmp_up:'+{PCT}% vs mese scorso', cmp_down:'-{PCT}% vs mese scorso', cmp_same:'0% vs mese scorso',
+  cmp_msg_up:'Hai speso <strong>{CUR}</strong> in più rispetto a {M}.', cmp_msg_down:'Hai speso <strong>{CUR}</strong> in meno rispetto a {M}. Ottimo progresso!',
+  cmp_msg_same:'Le tue spese sono uguali a {M}.', cmp_no_prev:'Non ci sono ancora dati del mese scorso da confrontare.',
+  exp_breakdown_title:'Ripartizione per categoria', exp_breakdown_empty:'Nessuna spesa in questo mese da suddividere.',
+  d_income_month:'Entrate del mese', d_add_income:'Aggiungi entrata', d_income_hist:'Storico entrate',
+  d_expense_month:'Spese del mese', d_add_expense:'Aggiungi spesa', d_expense_hist:'Storico spese',
+  d_saving_month:'Risparmi del mese', d_add_saving:'Aggiungi risparmio', d_saving_hist:'Storico risparmi',
+  s_lang:'Lingua', s_lang_sub:'Seleziona la lingua dell’app.',
+  months:['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'], locale:'it-IT', prof_moves:'movimenti'
+};
+
 function L(key) {
   const d = I18N[currentLang] || I18N['en'];
   return d[key] !== undefined ? d[key] : (I18N['en'][key] || key);
@@ -964,10 +1041,18 @@ function catEmoji(storedCat) {
   return storedCat ? storedCat.split(' ')[0] : '📦';
 }
 
+function updateHomeGreeting() {
+  const el = document.getElementById('home-greeting');
+  if (!el) return;
+  const hour = new Date().getHours();
+  el.textContent = hour<12 ? L('g_morning') : hour<19 ? L('g_afternoon') : L('g_evening');
+}
+
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem(SK_LANG, lang);
   applyTranslations();
+  updateHomeGreeting();
   renderAll();
   ['balance','income','expense','saving'].forEach(k => renderDetailPage(k));
 }
@@ -1006,7 +1091,7 @@ function applyTranslations() {
   set('lbl-saving', L('lbl_saving'));
   set('home-recent-lbl', L('recent'));
   set('home-see-all-lbl', L('see_all'));
-  set('forecast-title-lbl', L('fc_title'));
+  set('compare-title-lbl', L('cmp_title'));
   set('insights-title-lbl', L('ins_title'));
   set('recurring-banner-title', L('rec_title'));
   set('challenge-title-lbl', L('ch_title'));
@@ -1021,6 +1106,7 @@ function applyTranslations() {
   set('income-history-title', L('d_income_hist'));
   set('expense-hero-label', L('d_expense_month'));
   set('expense-history-title', L('d_expense_hist'));
+  set('expense-breakdown-title', L('exp_breakdown_title'));
   set('saving-hero-label', L('d_saving_month'));
   set('saving-history-title', L('d_saving_hist'));
   set('saving-goal-title', L('d_goal'));
@@ -1306,9 +1392,7 @@ function loadActiveProfile() {
   nextId         = profile.nextId||(transactions.length+1);
   confirmedRecurring = new Set(profile.recurringConfirmed||[]);
   document.querySelectorAll('.currency-btn').forEach(b=>b.classList.toggle('active',b.dataset.symbol===currencySymbol));
-  const hour = new Date().getHours();
-  const greeting = hour<12?L('g_morning'):hour<19?L('g_afternoon'):L('g_evening');
-  document.getElementById('home-greeting').textContent = greeting;
+  updateHomeGreeting();
   // CORREGIDO: Mostrar nombre directamente sin prefijo
   document.getElementById('home-welcome-name').textContent = profile.name;
   document.getElementById('home-nav-avatar').textContent = profile.avatar||'👤';
@@ -1577,52 +1661,90 @@ function renderInsights(stats) {
 }
 
 // ══════════════════════════════════════════════════
-// FEATURE 2: MONTH-END FORECAST (CORREGIDO)
+// FEATURE 2: EXPENSE COMPARISON (VS PREVIOUS MONTH)
 // ══════════════════════════════════════════════════
-function renderForecast(stats) {
-  const card = document.getElementById('forecast-card');
-  if (transactions.length < 3 || stats.income === 0) { card.style.display='none'; return; }
-  card.style.display = 'block';
+function getPreviousMonthSelection(sel) {
+  if (!sel) return null;
+  const prevMonth = sel.month === 1 ? 12 : sel.month - 1;
+  const prevYear = sel.month === 1 ? sel.year - 1 : sel.year;
+  return { year: prevYear, month: prevMonth };
+}
 
-  const today       = new Date();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-  const dayOfMonth  = today.getDate();
-  const daysLeft    = daysInMonth - dayOfMonth;
+function renderExpenseComparison(currentMonthStats) {
+  const card = document.getElementById('expense-compare-card');
+  if (!card) return;
+  const currentSel = getCurrentMonthSelection();
+  const prevSel = getPreviousMonthSelection(currentSel);
+  const prevTx = filterByMonth(transactions, prevSel);
+  const prevStats = computeStats(prevTx);
 
-  // Usar gastos reales de este mes
-  const thisMonthTx = filterByMonth(transactions, { year: today.getFullYear(), month: today.getMonth()+1 });
-  const thisMonthStats = computeStats(thisMonthTx);
-  
-  // Calcular proyección suavizada para evitar picos irreales al inicio de mes
-  const smoothingDays  = Math.max(dayOfMonth, 7);
-  const dailyRate      = smoothingDays > 0 ? thisMonthStats.expense / smoothingDays : 0;
-  const projectedTotal = thisMonthStats.expense + (dailyRate * daysLeft);
-  const projectedBalance = stats.income - projectedTotal - stats.saving;
-
-  // Asegurar que el porcentaje sea válido
-  const maxIncome = Math.max(stats.income, 0.01); // Evitar división por cero
-  const ratio = Math.min(projectedTotal / maxIncome, 1);
-  const pct   = isNaN(ratio) ? 0 : Math.round(ratio * 100);
-
-  let status, msg;
-  if (projectedBalance > 0) {
-    status = 'ok';
-    msg = L('fc_ok').replace('{V}', fmt(Math.abs(projectedBalance)));
-  } else if (projectedBalance > -stats.income * 0.1) {
-    status = 'warn';
-    msg = L('fc_w').replace('{V}', fmt(Math.abs(projectedBalance)));
-  } else {
-    status = 'bad';
-    msg = L('fc_b').replace('{V}', fmt(Math.abs(projectedBalance)));
+  if (prevStats.expense <= 0) {
+    card.style.display = 'block';
+    document.getElementById('compare-amount').className = 'compare-amount same';
+    document.getElementById('compare-amount').textContent = L('cmp_same');
+    document.getElementById('compare-msg').textContent = L('cmp_no_prev');
+    return;
   }
 
-  document.getElementById('forecast-badge').textContent = status==='ok'?L('fc_surplus'):status==='warn'?L('fc_warn'):L('fc_deficit');
-  document.getElementById('forecast-badge').className = `forecast-badge ${status}`;
-  document.getElementById('forecast-bar').style.width = pct+'%';
-  document.getElementById('forecast-bar').className = `forecast-bar ${status}`;
-  document.getElementById('forecast-spent-label').textContent = L('fc_spent')+fmt(thisMonthStats.expense);
-  document.getElementById('forecast-income-label').textContent = L('fc_inc')+fmt(stats.income);
-  document.getElementById('forecast-msg').innerHTML = msg;
+  card.style.display = 'block';
+  const diff = currentMonthStats.expense - prevStats.expense;
+  const pct = Math.round(Math.abs(diff) / prevStats.expense * 100);
+  const prevMonthName = `${getMonthNames()[prevSel.month-1]} ${prevSel.year}`;
+
+  let amountClass = 'compare-amount same';
+  let amountText = L('cmp_same');
+  let message = L('cmp_msg_same').replace('{M}', prevMonthName);
+
+  if (diff > 0) {
+    amountClass = 'compare-amount up';
+    amountText = L('cmp_up').replace('{PCT}', pct);
+    message = L('cmp_msg_up').replace('{CUR}', fmt(Math.abs(diff))).replace('{M}', prevMonthName);
+  } else if (diff < 0) {
+    amountClass = 'compare-amount down';
+    amountText = L('cmp_down').replace('{PCT}', pct);
+    message = L('cmp_msg_down').replace('{CUR}', fmt(Math.abs(diff))).replace('{M}', prevMonthName);
+  }
+
+  document.getElementById('compare-amount').className = amountClass;
+  document.getElementById('compare-amount').textContent = amountText;
+  document.getElementById('compare-msg').innerHTML = message;
+}
+
+function renderExpenseBreakdown(txs) {
+  const card = document.getElementById('expense-breakdown-card');
+  const list = document.getElementById('expense-breakdown-list');
+  if (!card || !list) return;
+
+  const expenses = txs.filter(t => t.type === 'expense');
+  if (!expenses.length) {
+    card.style.display = 'block';
+    list.innerHTML = `<div class="breakdown-empty">${L('exp_breakdown_empty')}</div>`;
+    return;
+  }
+
+  const totals = {};
+  expenses.forEach(t => {
+    const key = translateCat(t.cat || '📦 Otros');
+    totals[key] = (totals[key] || 0) + t.amount;
+  });
+
+  const rows = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  const totalExpense = rows.reduce((sum, [,amt])=>sum+amt, 0);
+
+  list.innerHTML = rows.map(([cat, amount]) => {
+    const pct = totalExpense > 0 ? Math.round(amount / totalExpense * 100) : 0;
+    const name = catName(cat);
+    const emoji = catEmoji(cat);
+    return `<div class="breakdown-item">
+      <div class="breakdown-row">
+        <span class="breakdown-cat">${emoji} ${name}</span>
+        <span class="breakdown-meta">${fmt(amount)} · ${pct}%</span>
+      </div>
+      <div class="breakdown-track"><div class="breakdown-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  card.style.display = 'block';
 }
 
 // ══════════════════════════════════════════════════
@@ -1886,6 +2008,7 @@ function renderDetailPage(pageKey) {
     document.getElementById('d-expense-total').textContent = fmt(s.expense);
     document.getElementById('d-expense-sub').textContent = L('d_spent_month').replace('{AMT}',fmt(s.expense)).replace('{M}',monthLabel);
     buildMonthTabs('expense-month-tabs', 'expense');
+    renderExpenseBreakdown(filtered);
     const sorted = [...filtered].filter(t=>t.type==='expense').sort((a,b)=>new Date(b.date)-new Date(a.date));
     document.getElementById('expense-tx-list').innerHTML = sorted.map(buildTxItem).join('') || emptyState();
   }
@@ -1939,7 +2062,7 @@ function renderAll() {
   document.getElementById('home-tx-list').innerHTML = sorted.slice(0,5).map(buildTxItem).join('') || emptyStateFirst();
 
   // Smart features
-  renderForecast(s);
+  renderExpenseComparison(s);
   renderInsights(s);
   renderRecurringBanner();
   renderChallenge();
